@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#060913">
+    <title>Ranking NSL Sênior</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #060913;
+            --bg2: #0b1224;
+            --card: rgba(17,26,48,.78);
+            --card-solid: #111a30;
+            --card2: #16213d;
+            --line: rgba(130,160,220,.16);
+            --line2: rgba(130,160,220,.28);
+            --txt: #eef2ff;
+            --mut: #8d99ba;
+            --mut2: #aab5d3;
+            --gold: #ffd24a;
+            --gold2: #f5a524;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --indigo: #1e2f7a;
+            --green: #34f5a0;
+            --red: #ff5470;
+            --orange: #ff9f1c;
+            --silver: #cfd6e4;
+            --bronze: #d98a4a;
+            --radius: 18px;
+            --font: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-t: 'Sora', 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg);
+            color: var(--txt);
+            font-family: var(--font);
+            margin: 0;
+            padding: 14px 20px 14px;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== FUNDO ANIMADO NUVENS BLACK FRIDAY (SUA IMAGEM) ===== */
+        #bg-clouds {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110vw;
+            height: 110vh;
+            background-color: #03050a; /* Fundo muito escuro para mesclar perfeitamente com a sua imagem */
+            background-image: url('fundo-cores.png'); 
+            background-size: 100% auto; /* Trava a largura e impede o zoom distorcido na altura */
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+            transition: transform 0.1s ease-out; /* Parallax suave */
+            pointer-events: none;
+        }
+
+        /* Camada de Partículas Flutuantes por cima das nuvens */
+        .bg-efeito-cores { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden; }
+        @keyframes flutuarParticula { 0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0.1; } 50% { opacity: 0.8; } 100% { transform: translateY(-40vh) rotate(360deg) scale(1.3); opacity: 0; } }
+        
+        @media (prefers-reduced-motion: reduce) { 
+            .bg-efeito-cores div { animation: none !important; opacity: 0.3 !important; } 
+            #bg-clouds { transition: none; transform: none !important; }
+        }
+
+        /* ===== TOPO ===== */
+        #topo-geral { position: relative; z-index: 100; }
+        .hero { text-align: center; margin: 0 auto 12px; max-width: 100%; position: relative; }
+        .hero h1 {
+            font-family: var(--font-t);
+            margin: 0;
+            font-size: 1.7em;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            line-height: 1.1;
+            white-space: nowrap;
+            background: linear-gradient(90deg, #00d2ff, #9b00e8, #ff0055, #ff8c00, #ffe100, #34f5a0, #00d2ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: brilhoCores 6s linear infinite;
+            filter: drop-shadow(0 4px 15px rgba(255,255,255,.15));
+        }
+        @keyframes brilhoCores { to { background-position: -200% center; } }
+        .hero p { color: var(--mut2); font-size: .95em; font-style: italic; margin: 6px 0 0; text-shadow: 0 2px 4px rgba(0,0,0,.8); }
+
+        /* ===== NAVEGAÇÃO ===== */
+        .tab-container { display: flex; justify-content: center; gap: 8px; margin: 0 auto 14px; flex-wrap: wrap; max-width: 1200px; padding: 6px; background: rgba(12,18,34,.75); border: 1px solid var(--line); border-radius: 60px; width: fit-content; backdrop-filter: blur(10px); }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: var(--mut2); padding: 9px 18px; border-radius: 40px; cursor: pointer; font-weight: 700; font-size: .92em; font-family: inherit; transition: all .25s ease; display: flex; align-items: center; gap: 8px; }
+        .tab-btn svg { width: 18px; height: 18px; stroke: currentColor; transition: all .2s; }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,.06); }
+        .tab-btn.active { background: linear-gradient(135deg, #ff0055 0%, #9b00e8 55%, #00d2ff 100%); color: #fff; box-shadow: 0 6px 22px rgba(155,0,232,.35); }
+        .tab-btn.tab-logout { color: var(--red); }
+        .tab-btn.tab-logout:hover { background: rgba(255,84,112,.12); color: var(--red); }
+        .tab-content { display: none; animation: fadeIn .45s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== PÓDIO ===== */
+        .painel-principal { display: flex; justify-content: space-around; max-width: 1300px; margin: 0 auto; gap: 24px; align-items: flex-start; }
+        .secao-podio { display: flex; justify-content: center; align-items: flex-end; gap: 20px; padding-top: 135px; padding-bottom: 8px; position: relative; overflow: visible; }
+        .secao-podio::after { content: ''; position: absolute; bottom: 0px; left: 3%; width: 94%; height: 4px; background: radial-gradient(ellipse at center, rgba(34,211,238,.6) 0%, transparent 70%); border-radius: 50%; z-index: 0; }
+
+        .podio { background: linear-gradient(180deg, #19284f, #0a1020); border-radius: 22px 22px 0 0; width: 195px; text-align: center; padding: 20px 10px 15px; transition: transform .3s ease, box-shadow .3s ease; cursor: pointer; position: relative; display: flex; flex-direction: column; align-items: center; z-index: 1; margin-bottom: 2px; }
+        .podio::before { content: ''; position: absolute; bottom: -12px; left: 10%; width: 80%; height: 12px; background: rgba(0,0,0,.8); border-radius: 50%; filter: blur(5px); z-index: -1; }
+        .podio:hover { transform: translateY(-10px); }
+        .podio:active { transform: translateY(-4px) scale(.98); }
+
+        .avatar-circle { border-radius: 50%; display: none; position: absolute; left: 0; right: 0; margin: 0 auto; overflow: hidden; background-color: #0b0f19; z-index: 10; justify-content: center; align-items: center; }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; border-radius: 50%; display: block; }
+        .avatar-1 { width: 160px; height: 160px; top: -80px; border: 3px solid var(--gold); box-shadow: 0 0 40px rgba(255,215,0,.85); }
+        .avatar-2 { width: 130px; height: 130px; top: -65px; border: 3px solid var(--silver); box-shadow: 0 0 32px rgba(192,192,192,.75); }
+        .avatar-3 { width: 120px; height: 120px; top: -60px; border: 3px solid var(--bronze); box-shadow: 0 0 32px rgba(205,127,50,.75); }
+
+        .trofeu-lado { position: absolute; left: 100%; top: -50px; margin-left: -50px; width: 100px; z-index: 11; filter: drop-shadow(0 6px 14px rgba(255,210,74,.55)); animation: flutuaTrofeu 3.2s ease-in-out infinite; pointer-events: none; }
+        .trofeu-lado svg { display: block; width: 100%; height: auto; }
+        @keyframes flutuaTrofeu { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+
+        .pos-num { margin: 0; font-family: var(--font-t); font-weight: 800; }
+        .nome-senior { flex-shrink: 0; min-height: 22px; font-size: 1.15em; font-weight: 800; color: #fff; margin: 15px 0 2px; text-shadow: 0 2px 4px rgba(0,0,0,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .nome-desk { display: inline; } .nome-mob { display: none; }
+        .nome-senior.nome-multi { white-space: normal; font-size: .85em !important; line-height: 1.2; }
+        .detalhe-senior { font-size: .95em; color: var(--gold); margin-top: 8px; font-weight: 800; letter-spacing: 1px; }
+        .info-filial-podio { font-size: .7em; font-weight: 700; color: #cbd5e1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-bottom: 5px; display: block; }
+
+        .badge-capsula { background: #0a0f1c; border-radius: 20px; padding: 8px 4px; margin-top: auto; width: 95%; }
+        .badge-1 { border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(255,215,0,.4); }
+        .badge-2 { border: 2px solid var(--silver); box-shadow: 0 0 15px rgba(192,192,192,.4); }
+        .badge-3 { border: 2px solid var(--bronze); box-shadow: 0 0 15px rgba(205,127,50,.4); }
+        .badge-pontos { font-size: 1.05em; font-weight: 800; display: block; margin-top: 3px; }
+        .badge-1 .badge-pontos { color: var(--gold); }
+        .badge-2 .badge-pontos { color: var(--silver); }
+        .badge-3 .badge-pontos { color: var(--bronze); }
+
+        .podio-1 { height: 360px; border: 2px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 60px rgba(255,210,74,.12); padding-top: 90px; background: linear-gradient(180deg, #2a2a3a 0%, #141a30 35%, #0a1020 100%); }
+        .podio-2 { height: 270px; border: 2px solid var(--silver); box-shadow: 0 4px 10px rgba(0,0,0,.5); padding-top: 75px; }
+        .podio-3 { height: 230px; border: 2px solid var(--bronze); box-shadow: 0 4px 10px rgba(0,0,0,.5); padding-top: 60px; }
+        .podio-1:hover { box-shadow: 0 0 38px rgba(255,215,0,.6), inset 0 0 25px rgba(255,215,0,.3); }
+        .podio-2:hover { box-shadow: 0 0 38px rgba(192,192,192,.6), inset 0 0 25px rgba(192,192,192,.3); }
+        .podio-3:hover { box-shadow: 0 0 38px rgba(205,127,50,.6), inset 0 0 25px rgba(205,127,50,.3); }
+
+        /* ===== MENSAGEM FLUTUANTE ===== */
+        .floating-msg { position: fixed; font-family: var(--font-t); font-size: 1.7em; font-weight: 800; text-transform: uppercase; text-shadow: 0 4px 12px rgba(0,0,0,.85); pointer-events: none; z-index: 9999; white-space: nowrap; transform: translateX(-50%); animation: floatUpFade 2.5s ease-out forwards; }
+        @keyframes floatUpFade { 0% { opacity: 0; transform: translate(-50%, 20px) scale(.8); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -60px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -100px) scale(.9); } }
+
+        /* ===== LISTA ===== */
+        .secao-lista-wrapper { width: 100%; max-width: 500px; margin: 0 auto; text-align: left; }
+        .busca-ranking { width: 100%; padding: 14px 20px; border-radius: 14px; border: 1px solid var(--line2); background: rgba(17,26,48,.9); color: #fff; margin-bottom: 10px; outline: none; font-size: 1em; font-weight: 600; font-family: inherit; transition: all .2s; }
+        .busca-ranking::placeholder { color: var(--mut); }
+        .busca-ranking:focus { border-color: #9b00e8; box-shadow: 0 0 0 3px rgba(155,0,232,.18); }
+        .secao-lista { background: rgba(14,22,42,.72); border-radius: 16px; padding: 16px; height: calc(100vh - 330px); min-height: 300px; max-height: 430px; overflow-y: auto; border: 1px solid var(--line); width: 100%; }
+        .secao-lista::-webkit-scrollbar { width: 8px; }
+        .secao-lista::-webkit-scrollbar-thumb { background: linear-gradient(var(--cyan), #9b00e8); border-radius: 4px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--card2); margin-bottom: 10px; padding: 13px 15px; border-radius: 12px; border-left: 4px solid var(--cyan); transition: all .2s; cursor: pointer; }
+        .item-lista:hover { background: #1d2b4e; transform: translateX(4px); border-left-color: #ff0055; }
+        .posicao-lista { color: var(--mut); font-weight: 800; width: 34px; font-size: .9em; flex-shrink: 0; }
+        .nome-wrap { flex: 1; min-width: 0; }
+        .nome-filial { display: block; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .95em; color: #fff; }
+        .barra { height: 4px; background: rgba(255,255,255,.07); border-radius: 4px; margin-top: 7px; overflow: hidden; }
+        .barra i { display: block; height: 100%; background: linear-gradient(90deg, #00d2ff, #9b00e8); border-radius: 4px; }
+        .pontos-filial { color: var(--cyan); font-weight: 800; white-space: nowrap; font-size: .95em; }
+        .acessar-lista { color: var(--mut2); font-size: .9em; font-weight: 700; white-space: nowrap; }
+        .skeleton { height: 52px; border-radius: 12px; margin-bottom: 10px; background: linear-gradient(90deg, #16213d 25%, #1e2c52 50%, #16213d 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        #texto-carregando { text-align: center; color: var(--mut); font-size: .88em; margin-top: 12px; font-weight: 600; }
+        #aviso-erro { color: var(--red); text-align: center; font-size: .92em; margin-top: 14px; display: none; padding: 14px; background: rgba(255,84,112,.1); border-radius: 10px; border: 1px solid var(--red); font-weight: 700; line-height: 1.5; }
+        .sync-container { text-align: center; margin-top: 10px; font-size: .8em; color: var(--mut); font-weight: 700; }
+
+        /* ===== TELAS SECUNDÁRIAS / BOTÕES ===== */
+        .container-metas { max-width: 1100px; margin: 0 auto; text-align: center; width: 100%; }
+        .tela-selecao { display: block; }
+        .tela-detalhe { display: none; animation: fadeIn .45s ease; text-align: left; }
+        .topbar-detalhe { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+
+        .btn-voltar { background: transparent; border: 1px solid var(--mut); color: var(--mut2); padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 700; font-size: .95em; display: flex; align-items: center; gap: 8px; font-family: inherit; transition: all .2s; }
+        .btn-voltar:hover { background: var(--mut2); color: #0b0f19; }
+        .btn-top10 { background: linear-gradient(135deg, #ff0055 0%, #9b00e8 55%, #00d2ff 100%); color: #fff; border: none; padding: 11px 22px; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: .95em; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(155,0,232,.35); transition: transform .2s, box-shadow .2s; }
+        .btn-top10:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 26px rgba(155,0,232,.45); }
+
+        .btn-whatsapp-equipe { background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: .9em; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; margin-top: 15px; transition: transform .2s, box-shadow .2s; box-shadow: 0 6px 20px rgba(37,211,102,.35); }
+        .btn-whatsapp-equipe:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 26px rgba(37,211,102,.5); }
+
+        .card-maximized { background: var(--card); border: 1px solid var(--line2); border-radius: 24px; padding: 38px; max-width: 1000px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(34,211,238,.06); position: relative; }
+        .card-maximized::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 24px 24px 0 0; background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), transparent); }
+
+        .detalhe-header { text-align: center; border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+        .detalhe-nome { font-family: var(--font-t); font-size: 2.3em; font-weight: 800; color: #fff; margin: 0; text-transform: uppercase; }
+        .detalhe-cidade { font-size: 1.05em; color: var(--mut2); margin-top: 8px; font-weight: 700; letter-spacing: 2px; }
+
+        .placeholder-compacto { background: rgba(255,210,74,.07); border: 1px dashed rgba(255,210,74,.4); color: var(--mut2); padding: 14px 20px; border-radius: 14px; max-width: 560px; margin: 0 auto 14px; line-height: 1.5; font-size: .95em; }
+        .placeholder-compacto strong { color: var(--gold); letter-spacing: 1.5px; }
+
+        /* ===== LOGIN ===== */
+        #login-overlay { position: fixed; inset: 0; background: rgba(3,5,12,.88); z-index: 99999; display: none; opacity: 0; flex-direction: column; justify-content: center; align-items: center; transition: opacity .3s ease; backdrop-filter: blur(10px); padding: 16px; }
+        #login-overlay .card-maximized { padding: 30px; max-width: 420px; width: 100%; text-align: center; }
+        .btn-fechar-login { position: absolute; top: 14px; right: 16px; background: transparent; border: none; color: var(--mut2); font-size: 1.6em; cursor: pointer; line-height: 1; }
+        .btn-fechar-login:hover { color: #fff; }
+        .lock-ico { width: 56px; height: 56px; font-size: 1.6em; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(34,211,238,.25), rgba(34,211,238,.04)); border: 1px solid rgba(34,211,238,.4); box-shadow: 0 0 30px rgba(34,211,238,.25); }
+        .login-titulo { color: var(--cyan); font-family: var(--font-t); margin: 0 0 8px; font-size: 1.4em; letter-spacing: 1px; }
+        .login-sub { color: var(--mut2); font-size: .92em; margin: 0 0 18px; line-height: 1.4; }
+        .input-login { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line2); background: #0b1224; color: #fff; text-align: center; font-size: 1em; margin-bottom: 12px; outline: none; font-family: inherit; transition: all .2s; }
+        .input-login:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+        #login-erro { color: var(--red); margin-top: 14px; font-size: .88em; font-weight: 700; display: none; }
+        #login-loading { color: var(--gold); margin-top: 14px; font-size: .85em; font-weight: 700; }
+
+        /* ===== BLOCOS DE INDICADORES ===== */
+        .grid-blocos-indicadores { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .bloco-full { grid-column: 1 / -1; width: 100%; justify-self: center; }
+        .bloco-indicador { background: rgba(8,13,26,.62); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; }
+        .titulo-bloco { font-family: var(--font-t); font-size: 1.15em; font-weight: 800; margin: 0 0 14px; text-align: center; letter-spacing: 1px; line-height: 1.3; }
+        .ind-grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+        .ind-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+        .ind-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+        .item-ind-max { background: var(--card2); padding: 15px 10px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,.05); transition: transform .2s, border-color .2s; }
+        .item-ind-max:hover { transform: translateY(-3px); border-color: rgba(34,211,238,.5); }
+        .label-ind-max { font-size: .72em; color: var(--mut); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        .val-ind-max { font-size: 1.65em; font-weight: 900; margin-top: 5px; }
+        .badge-perda { display: inline-block; background: var(--red); color: #fff; padding: 6px 12px; border-radius: 15px; font-size: .85em; font-weight: 700; margin: 4px; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+        .premio-gigante-verde { font-size: 2.7em !important; color: var(--green) !important; text-shadow: 0 0 18px rgba(52,245,160,.5); font-family: var(--font-t); }
+
+        /* BARRAS DE PROGRESSO */
+        .progress-bg { width: 100%; background: rgba(255,255,255,.06); border-radius: 12px; height: 24px; margin-top: 8px; position: relative; border: 1px solid var(--line); overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 12px; transition: width 1.5s cubic-bezier(.22,1,.36,1); position: absolute; left: 0; top: 0; }
+        .progress-text { position: absolute; width: 100%; text-align: center; left: 0; top: 0; line-height: 24px; font-size: .85em; font-weight: 900; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,.9); z-index: 2; }
+        .pulsar-laranja { animation: pulseOrange 1s infinite alternate; }
+        @keyframes pulseOrange { from { box-shadow: 0 0 5px var(--orange); background-color: #e8890f; } to { box-shadow: 0 0 20px var(--orange); background-color: var(--orange); } }
+
+        /* ANEL E COMPONENTES (SIMULADOR) */
+        .nsl-hero { display: flex; align-items: center; gap: 26px; justify-content: center; flex-wrap: wrap; }
+        .ring-wrap { position: relative; width: 140px; height: 140px; flex: 0 0 auto; }
+        .ring-wrap svg { transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 10; }
+        .ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.6s cubic-bezier(.22,1,.36,1); }
+        .ring-centro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ring-centro b { font-family: var(--font-t); font-size: 1.7em; line-height: 1; }
+        .ring-centro span { font-size: .65em; color: var(--mut); font-weight: 800; letter-spacing: 1px; margin-top: 3px; }
+        .nsl-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; min-width: 260px; }
+        .comp-lista { margin-top: 20px; display: flex; flex-direction: column; gap: 11px; }
+        .comp-linha { display: grid; grid-template-columns: 150px 1fr 120px; gap: 12px; align-items: center; font-size: .85em; }
+        .comp-linha .cn { font-weight: 700; color: var(--mut2); }
+        .comp-linha .cb { height: 9px; background: rgba(255,255,255,.07); border-radius: 6px; overflow: hidden; }
+        .comp-linha .cb i { display: block; height: 100%; border-radius: 6px; transition: width 1.4s cubic-bezier(.22,1,.36,1); width: 0; }
+        .comp-linha .cv { text-align: right; font-weight: 800; color: #fff; white-space: nowrap; }
+        .comp-linha .cv small { color: var(--mut); font-weight: 600; }
+
+        /* ===== PRÊMIOS EXTRA ===== */
+        .container-premios { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 0 10px; width: 100%; height: calc(100vh - 85px); max-width: 1400px; }
+        .linha-imagens-premios { display: flex; flex-direction: row; gap: 20px; width: 100%; justify-content: center; align-items: center; flex: 1; min-height: 0; }
+        .img-premio { max-width: calc(50% - 10px); width: auto; max-height: 100%; height: auto; object-fit: contain; border-radius: 16px; border: 2px solid var(--line2); box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 40px rgba(34,211,238,.1); cursor: zoom-in; transition: transform .2s; }
+        .img-premio:hover { transform: scale(1.01); }
+        .bloco-potencial-ganho { width: 100%; background: linear-gradient(135deg, rgba(52,245,160,.1) 0%, rgba(8,13,26,.92) 100%); border: 2px solid var(--green); border-radius: 18px; padding: 15px 20px; text-align: center; box-shadow: 0 14px 36px rgba(0,0,0,.45); flex-shrink: 0; position: relative; }
+        .bloco-potencial-ganho h3 { color: var(--green); font-family: var(--font-t); font-size: 1.25em; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 12px rgba(52,245,160,.4); }
+        .grid-potencial { display: flex; align-items: stretch; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .item-potencial { background: var(--card2); border: 1px solid var(--line2); border-radius: 12px; padding: 10px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-width: 140px; }
+        .item-potencial.destaque { background: rgba(52,245,160,.12); border-color: var(--green); transform: scale(1.05); }
+        .item-potencial .label { font-size: .7em; color: var(--mut); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .item-potencial.destaque .label { color: var(--green); font-size: .8em; margin-bottom: 8px; }
+        .item-potencial .sub-label { font-size: .65em; color: var(--cyan); font-weight: 800; margin-bottom: 8px; }
+        .item-potencial .valor { font-size: 1.4em; font-weight: 900; color: #fff; }
+        .item-potencial.destaque .valor { font-size: 1.8em; color: var(--green); text-shadow: 0 0 15px rgba(52,245,160,.4); font-family: var(--font-t); }
+        .plus, .equals { font-size: 1.8em; font-weight: 900; color: var(--cyan); display: flex; align-items: center; justify-content: center; }
+
+        #lightbox { position: fixed; inset: 0; background: rgba(3,5,12,.94); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+        #lightbox.show { display: flex; animation: fadeIn .25s ease; }
+        #lightbox img { max-width: 96vw; max-height: 94vh; border-radius: 12px; box-shadow: 0 0 60px rgba(0,0,0,.8); }
+
+        /* ===== COMPARTILHAR ===== */
+        .share-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; }
+        .share-menu { background: rgba(12,18,34,.96); border: 1px solid var(--line2); border-radius: 14px; padding: 10px; margin-bottom: 12px; display: none; flex-direction: column; gap: 8px; box-shadow: 0 12px 30px rgba(0,0,0,.6); }
+        .share-menu.show { display: flex; animation: fadeIn .2s ease; }
+        .share-option { background: var(--card2); color: #fff; border: 1px solid var(--line); padding: 10px 16px; border-radius: 9px; cursor: pointer; font-weight: 700; transition: all .2s; display: flex; align-items: center; gap: 10px; font-size: .88em; white-space: nowrap; font-family: inherit; }
+        .share-option:hover { background: #9b00e8; color: #fff; }
+        .share-btn { background: linear-gradient(45deg, #ff8c00 0%, #ff0055 50%, #9b00e8 100%); color: #fff; border: none; width: 58px; height: 58px; border-radius: 50%; cursor: pointer; box-shadow: 0 6px 20px rgba(220,39,67,.55); transition: transform .2s; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .share-btn:hover { transform: scale(1.1) rotate(-6deg); }
+
+        #share-banner { display: none; text-align: center; margin: 0 auto 20px; padding-top: 6px; }
+        #share-banner .sb-t { font-family: var(--font-t); font-size: 2.4em; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
+        #share-banner .sb-s { font-weight: 800; letter-spacing: 3px; color: #fff; margin-top: 4px; font-size: 1em; }
+        #share-banner .sb-g { color: var(--mut2); font-style: italic; margin-top: 6px; font-size: .9em; }
+
+        /* ===== TOAST ===== */
+        #toast-box { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; width: calc(100% - 30px); max-width: 460px; }
+        .toast { background: rgba(14,22,42,.97); border: 1px solid var(--line2); border-left: 4px solid var(--cyan); color: #fff; padding: 13px 18px; border-radius: 12px; font-weight: 600; font-size: .92em; box-shadow: 0 14px 34px rgba(0,0,0,.6); animation: fadeIn .3s ease; line-height: 1.45; }
+        .toast.ok { border-left-color: var(--green); }
+        .toast.erro { border-left-color: var(--red); }
+
+        /* ===== DESKTOP ===== */
+        @media (min-width:851px) and (min-height:640px) {
+            html, body { height: 100%; }
+            body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+            #topo-geral { flex: 0 0 auto; }
+            .tab-content.active { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+
+            #aba-ranking .painel-principal { flex: 1; min-height: 0; width: 100%; align-items: stretch; }
+            #aba-ranking .secao-podio { flex: 1; align-self: stretch; align-items: flex-end; padding-top: 170px; padding-bottom: 8px; gap: 24px; margin-bottom: 10px; }
+            #aba-ranking .secao-lista-wrapper { display: flex; flex-direction: column; align-self: stretch; min-height: 0; }
+            #aba-ranking .secao-lista { flex: 1; height: auto; max-height: none; min-height: 0; }
+
+            #aba-ranking .podio { width: clamp(190px, 16vw, 250px); }
+            #aba-ranking .podio-1 { height: 370px; min-height: 320px; padding-top: 125px; }
+            #aba-ranking .podio-2 { height: 310px; min-height: 240px; padding-top: 94px; }
+            #aba-ranking .podio-3 { height: 270px; min-height: 200px; padding-top: 86px; }
+            #aba-ranking .avatar-1 { width: 180px; height: 180px; top: -105px; }
+            #aba-ranking .avatar-2 { width: 160px; height: 160px; top: -80px; }
+            #aba-ranking .avatar-3 { width: 150px; height: 150px; top: -73px; }
+            #aba-ranking .nome-senior { font-size: 1.4em; min-height: 28px; }
+            #aba-ranking .info-filial-podio { font-size: .78em; }
+            #aba-ranking .badge-pontos { font-size: 1.2em; }
+            #aba-ranking .trofeu-lado { width: 115px; top: -60px; margin-left: -55px; }
+
+            .tela-selecao .secao-lista-wrapper { max-width: 560px; }
+            .tela-selecao .secao-lista { height: calc(100vh - 330px); max-height: none; min-height: 250px; }
+            .tela-selecao .item-lista { padding: 10px 14px; margin-bottom: 8px; }
+
+            #aba-premios .container-premios { flex: 1; height: auto; min-height: 0; margin: 0 auto; }
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width:850px) {
+            body { padding: 12px 6px 95px; }
+            .hero h1 { font-size: 1.1em; white-space: normal; }
+            .hero p { font-size: .88em; padding: 0 10px; }
+
+            .tab-container {
+                position: fixed; bottom: 15px; left: 4%; width: 92%; margin: 0; padding: 10px 4px;
+                background: rgba(12,18,34,.95); backdrop-filter: blur(15px);
+                border: 1px solid var(--line2); border-radius: 40px;
+                display: flex !important; flex-direction: row; flex-wrap: nowrap; justify-content: space-around; align-items: center;
+                z-index: 9999; box-shadow: 0 8px 25px rgba(0,0,0,.6); gap: 0;
+            }
+            .tab-btn { flex-direction: column; flex: 1; min-width: 0; padding: 5px 1px; background: transparent !important; border: none !important; box-shadow: none !important; color: var(--mut); font-size: .6em; font-weight: 700; gap: 5px; white-space: nowrap; border-radius: 0; }
+            .tab-btn span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+            .tab-btn svg { width: 22px; height: 22px; stroke: var(--mut); transition: all .3s ease; }
+            .tab-btn.active { color: #ff0055 !important; }
+            .tab-btn.active svg { stroke: #ff0055; transform: scale(1.15); filter: drop-shadow(0 0 6px rgba(255,0,85,.5)); }
+            .tab-btn.tab-logout, .tab-btn.tab-logout svg { color: var(--red); stroke: var(--red); }
+
+            .share-container { bottom: 110px; right: 15px; }
+
+            .painel-principal { flex-direction: column; align-items: center; gap: 20px; }
+            .secao-podio { width: 100%; gap: 6px; padding-top: 140px; padding-bottom: 8px; margin-bottom: 15px; }
+            .podio { width: 32%; padding: 12px 4px; margin-bottom: 0; }
+            .avatar-1 { width: 125px; height: 125px; top: -62px; border-width: 2px; }
+            .avatar-2 { width: 90px; height: 90px; top: -45px; border-width: 2px; }
+            .avatar-3 { width: 85px; height: 85px; top: -42px; border-width: 2px; }
+            .trofeu-lado { width: 82px; top: -52px; margin-left: -41px; }
+            .podio-1 { padding-top: 70px; height: 280px; }
+            .podio-2 { padding-top: 50px; height: 220px; }
+            .podio-3 { padding-top: 45px; height: 200px; }
+            .nome-senior { margin: 10px 0 2px; font-size: .95em; }
+            .nome-desk { display: none; } .nome-mob { display: inline; }
+
+            .secao-lista-wrapper { padding: 0 10px; }
+            .secao-lista { height: auto; max-height: 450px; padding: 12px; }
+            .item-lista { padding: 11px; font-size: .85em; margin-bottom: 8px; }
+            #lista-selecao-ranking .nome-filial { white-space: normal; line-height: 1.3; }
+
+            .card-maximized { padding: 20px 14px; margin: 0 8px; width: auto; border-radius: 16px; }
+            #login-overlay .card-maximized { margin: 0; padding: 26px 18px; }
+            .detalhe-nome { font-size: 1.5em; line-height: 1.1; margin-bottom: 5px; }
+            .detalhe-cidade { font-size: .95em; }
+
+            .grid-blocos-indicadores { grid-template-columns: 1fr; gap: 14px; }
+            .bloco-indicador { padding: 15px; }
+            .ind-grid-2, .ind-grid-3 { grid-template-columns: 1fr; gap: 8px; }
+            .ind-grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+            .item-ind-max { padding: 12px 15px !important; display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; text-align: left !important; }
+            .item-ind-max .label-ind-max { margin-bottom: 0 !important; font-size: .7em !important; text-align: left !important; }
+            .item-ind-max .val-ind-max { font-size: 1.2em !important; margin-top: 0 !important; }
+
+            .caixa-destaque-mobile { flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; }
+            .caixa-destaque-mobile .label-ind-max { text-align: center !important; margin-bottom: 8px !important; font-size: .8em !important; }
+            .caixa-destaque-mobile .val-ind-max { font-size: 1.8em !important; width: 100% !important; text-align: center !important; }
+
+            .premio-gigante-verde { font-size: 2em !important; }
+            .badge-perda { padding: 6px 10px; font-size: .78em; margin: 3px; }
+
+            .nsl-hero { flex-direction: column; }
+            .nsl-kpis { grid-template-columns: 1fr; width: 100%; }
+            .comp-linha { grid-template-columns: 100px 1fr 90px; gap: 8px; font-size: .78em; }
+
+            .container-premios { height: auto; min-height: calc(100vh - 85px); justify-content: flex-start; }
+            .linha-imagens-premios { flex-direction: column; gap: 15px; flex: none; }
+            .img-premio { width: 100%; max-width: 100%; max-height: none; height: auto; }
+            .grid-potencial { flex-direction: column; gap: 8px; }
+            .plus, .equals { display: none; }
+            .item-potencial { width: 100%; }
+            .item-potencial.destaque { transform: none; margin-top: 10px; }
+
+            .lock-ico { width: 44px; height: 44px; font-size: 1.2em; }
+        }
+        /* =========================================================
+           LEGIBILIDADE SOBRE O FUNDO COLORIDO (fundo-cores.png)
+           Painéis quase opacos + sombra nos textos soltos
+           ========================================================= */
+        :root { --mut: #a9b4d0; --mut2: #c9d2ea; --painel: rgba(6,9,19,.90); }
+
+        /* Textos que ficam direto sobre a imagem */
+        /* (sem faixa escura: o fundo fica 100% visível; legibilidade via sombra no texto) */
+        .hero h1 { filter: drop-shadow(0 0 1px #000) drop-shadow(0 2px 2px rgba(0,0,0,.95)) drop-shadow(0 0 8px rgba(0,0,0,.85)); }
+        .hero p { color: #fff; text-shadow: 0 0 2px #000, 0 1px 3px #000, 0 0 8px rgba(0,0,0,.95), 0 0 16px rgba(0,0,0,.8); }
+        #texto-carregando, .regra-dica { color: #fff; text-shadow: 0 1px 2px #000, 0 0 10px rgba(0,0,0,.9); }
+
+        /* Painéis e caixas */
+        .tab-container { background: rgba(6,9,19,.88); border-color: var(--line2); backdrop-filter: blur(14px); }
+        .tab-btn { color: #dfe5f7; }
+        .secao-lista, .tabela-container-scroll { background: var(--painel); backdrop-filter: blur(14px); border-color: var(--line2); }
+        .card-maximized { background: rgba(10,15,30,.94); backdrop-filter: blur(16px); }
+        .busca-ranking { background: rgba(10,15,30,.94); border-color: var(--line2); }
+        .busca-ranking::placeholder { color: #b7c1dc; opacity: 1; }
+        .btn-voltar { background: rgba(6,9,19,.9); color: #fff; border-color: var(--line2); }
+        .btn-voltar.btn-logout { background: rgba(40,8,16,.92); color: #ff7a90; }
+        .placeholder-compacto { background: rgba(10,6,22,.92); border: 1px solid rgba(255,0,85,.6); color: #e6ebfa; backdrop-filter: blur(14px); box-shadow: 0 8px 28px rgba(0,0,0,.45); }
+        .placeholder-compacto strong { color: #ff4d86; }
+        .placeholder-compacto b { color: #fff; }
+        .bloco-indicador { background-color: rgba(8,13,26,.92); }
+        .comp-resumo { background: linear-gradient(135deg, rgba(255,0,85,.18), rgba(8,11,20,.95)); }
+        .tabela-metas thead th { background: #0b1224; }
+        .tabela-metas tbody tr { background: rgba(8,12,24,.55); }
+        .tabela-metas tbody tr:nth-child(even) { background: rgba(20,28,52,.55); }
+        .share-menu { background: rgba(10,15,30,.96); }
+        .input-login { background: rgba(10,15,30,.95); color: #fff; }
+        .input-login::placeholder { color: #9aa6c6; }
+        #aviso-erro { background: rgba(40,8,16,.92); }
+        .podio { box-shadow: 0 10px 30px rgba(0,0,0,.55); }
+        .podio * { text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+
+        /* =========================================================
+           EFEITOS BLACK: troféu, fumaça, cortina, intro
+           ========================================================= */
+        .trofeu-lado { filter: drop-shadow(0 8px 14px rgba(0,0,0,.85)) drop-shadow(0 0 10px rgba(255,210,74,.45)); }
+        .tb-estrela { transform-origin: 50px 35px; animation: tbEstrela 2.6s ease-in-out infinite; }
+        .tb-aura { animation: tbAura 2.6s ease-in-out infinite; }
+        @keyframes tbEstrela { 0%,100% { filter: drop-shadow(0 0 1px #ffd24a); } 50% { filter: drop-shadow(0 0 4px #ffe58a) drop-shadow(0 0 8px #ffd24a); } }
+        @keyframes tbAura { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+
+        .podio-brilho { position: absolute; inset: 0; border-radius: 20px 20px 0 0; overflow: hidden; pointer-events: none; z-index: -1; }
+        .podio-brilho::before { content: ''; position: absolute; top: -20%; left: -60%; width: 45%; height: 140%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgba(255,230,140,.18), rgba(255,255,255,.28), rgba(255,230,140,.18), transparent); animation: brilhoPassa 4.5s ease-in-out infinite; }
+        @keyframes brilhoPassa { 0% { left: -60%; } 55%, 100% { left: 130%; } }
+
+        .fumaca { position: fixed; left: -10vw; right: -10vw; bottom: -12vh; height: 60vh; z-index: -1; pointer-events: none; overflow: hidden; }
+        .fumaca span { position: absolute; bottom: 0; width: 70vw; height: 45vh; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(0,0,0,.92) 0%, rgba(4,4,10,.6) 40%, rgba(0,0,0,0) 70%); filter: blur(28px); will-change: transform, opacity; }
+        .fumaca span:nth-child(1) { left: -10%; animation: fumacaA 28s ease-in-out infinite alternate; }
+        .fumaca span:nth-child(2) { left: 25%; height: 38vh; animation: fumacaB 34s ease-in-out infinite alternate; }
+        .fumaca span:nth-child(3) { left: 55%; animation: fumacaA 31s ease-in-out infinite alternate-reverse; }
+        .fumaca span:nth-child(4) { left: 10%; height: 30vh; bottom: 6vh; opacity: .55; background: radial-gradient(ellipse at center, rgba(155,0,232,.22), rgba(0,0,0,0) 65%); animation: fumacaB 40s ease-in-out infinite alternate-reverse; }
+        .fumaca span:nth-child(5) { left: 60%; height: 30vh; bottom: 4vh; opacity: .5; background: radial-gradient(ellipse at center, rgba(255,0,85,.18), rgba(0,0,0,0) 65%); animation: fumacaA 37s ease-in-out infinite alternate; }
+        @keyframes fumacaA { 0% { transform: translate(0,0) scale(1); opacity: .8; } 50% { transform: translate(8vw,-4vh) scale(1.15); opacity: 1; } 100% { transform: translate(-6vw,-1vh) scale(.95); opacity: .7; } }
+        @keyframes fumacaB { 0% { transform: translate(0,0) scale(1.05); opacity: .7; } 50% { transform: translate(-9vw,-6vh) scale(1.2); opacity: .95; } 100% { transform: translate(5vw,-2vh) scale(1); opacity: .75; } }
+
+        #fumaca-palco { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 4500; pointer-events: none; display: none; }
+        .tab-content.active.entrada-black { animation: entradaBlack 1.5s ease both; }
+        @keyframes entradaBlack { 0%, 30% { opacity: 0; transform: scale(.97); filter: blur(10px); } 100% { opacity: 1; transform: none; filter: none; } }
+
+        #intro-black { position: fixed; inset: 0; z-index: 8000; background: #000; display: none; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+        #intro-black.show { display: flex; }
+        #intro-black.saindo { animation: introSai 1.3s cubic-bezier(.7,0,.3,1) forwards; }
+        @keyframes introSai { to { clip-path: inset(50% 0 50% 0); opacity: .3; } }
+        .ib-fumaca span { position: absolute; width: 80vw; height: 60vh; border-radius: 50%; filter: blur(40px); opacity: .5; }
+        .ib-fumaca span:nth-child(1) { left: -30vw; bottom: -20vh; background: radial-gradient(ellipse, rgba(155,0,232,.55), transparent 65%); animation: fumacaA 6s ease-in-out infinite alternate; }
+        .ib-fumaca span:nth-child(2) { right: -30vw; top: -20vh; background: radial-gradient(ellipse, rgba(255,0,85,.45), transparent 65%); animation: fumacaB 7s ease-in-out infinite alternate; }
+        .ib-fumaca span:nth-child(3) { left: 20vw; bottom: -35vh; background: radial-gradient(ellipse, rgba(0,210,255,.35), transparent 65%); animation: fumacaA 8s ease-in-out infinite alternate-reverse; }
+        .ib-conteudo { position: relative; text-align: center; }
+        #intro-black:not(.rodando) .ib-conteudo { visibility: hidden; }
+        #intro-black:not(.rodando) .ib-conteudo * { animation: none !important; }
+        .ib-start { position: absolute; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: none; cursor: pointer; color: #fff; font-family: var(--font-t); }
+        #intro-black.rodando .ib-start, #intro-black:not(.pedir-clique) .ib-start { display: none; }
+        .ib-start-anel { width: 96px; height: 96px; border-radius: 50%; border: 2px solid #ffd24a; box-shadow: 0 0 30px rgba(255,210,74,.45), inset 0 0 20px rgba(255,210,74,.25); animation: ibPulso 1.6s ease-in-out infinite; background: radial-gradient(circle, rgba(255,210,74,.18), transparent 70%); }
+        .ib-start-txt { font-size: 1.15em; font-weight: 800; letter-spacing: 4px; color: #ffd24a; text-shadow: 0 0 14px rgba(255,210,74,.5); }
+        .ib-start small { color: #aab5d3; font-weight: 700; letter-spacing: 2px; font-family: var(--font); }
+        @keyframes ibPulso { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.12); opacity: 1; } }
+        #btn-som { position: fixed; left: 20px; bottom: 24px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line2); background: rgba(6,9,19,.9); color: #fff; font-size: 1.15em; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.5); transition: transform .2s; }
+        #btn-som:hover { transform: scale(1.1); }
+        #btn-som.mudo { opacity: .6; }
+        @media (max-width:850px) { #btn-som { left: 15px; bottom: 110px; width: 40px; height: 40px; } }
+        .ib-eyebrow { color: #c9d2ea; font-weight: 800; letter-spacing: 6px; font-size: .8em; opacity: 0; animation: ibSobe 1s .4s ease forwards; }
+        .ib-titulo { font-family: var(--font-t); font-weight: 800; line-height: .95; margin: 14px 0; display: flex; flex-direction: column; align-items: center; }
+        .ib-titulo span { font-size: clamp(3.2em, 11vw, 7em); letter-spacing: .02em; background: linear-gradient(180deg, #ffffff 0%, #c9c9d2 45%, #4a4a55 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 18px rgba(255,255,255,.18)); opacity: 0; animation: ibEntra 1.3s .9s cubic-bezier(.2,.9,.3,1.1) forwards; }
+        .ib-titulo span:last-child { animation-delay: 1.7s; }
+        .ib-titulo small { font-size: clamp(1.2em, 3vw, 1.8em); letter-spacing: 10px; color: #ffd24a; opacity: 0; animation: ibSobe .9s 1.4s ease forwards; }
+        .ib-linha { height: 3px; width: 0; margin: 6px auto 12px; background: linear-gradient(90deg, #00d2ff, #9b00e8, #ff0055, #ff8c00, #ffd24a); box-shadow: 0 0 16px rgba(255,0,85,.6); animation: ibLinha 1.4s 2.6s ease forwards; }
+        .ib-sub { color: #ffd24a; font-weight: 900; letter-spacing: 8px; font-size: 1em; opacity: 0; animation: ibSobe 1s 3.3s ease forwards; }
+        @keyframes ibEntra { from { opacity: 0; transform: scale(1.6); filter: blur(14px); } to { opacity: 1; transform: none; filter: drop-shadow(0 0 18px rgba(255,255,255,.18)); } }
+        @keyframes ibSobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        @keyframes ibLinha { to { width: min(420px, 70vw); } }
+
+        @media (max-width:850px) { .fumaca span { filter: blur(20px); } }
+        @media (prefers-reduced-motion: reduce) {
+            .fumaca span, .ib-fumaca span, .podio-brilho::before, .tb-estrela, .tb-aura { animation: none !important; }
+        }
+
+        .placeholder-compacto strong { color: #ff4d86; }
+        .item-potencial, .item-ind-max { backdrop-filter: blur(6px); }
+        .container-premios .img-premio { box-shadow: 0 14px 40px rgba(0,0,0,.6), 0 0 40px rgba(155,0,232,.18); }
+        #login-overlay .card-maximized::before { background: linear-gradient(90deg, transparent, #9b00e8, #ff0055, transparent); }
+        .card-maximized::before { background: linear-gradient(90deg, transparent, #9b00e8, #ff0055, transparent); }
+
+        /* ===== PRÊMIOS EXTRAS (HTML) ===== */
+        .pz-titulo { font-family: var(--font-t); font-weight: 800; letter-spacing: 1.5px; font-size: clamp(.95em, 1.5vw, 1.25em); color: #fff; text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,.9); }
+        .pz-titulo span { color: #ffd24a; }
+        .pz-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: 100%; flex: 1 1 auto; min-height: 0; }
+        .pz-card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 20px; background: rgba(8,11,24,.93); border: 2px solid var(--c); box-shadow: 0 0 26px color-mix(in srgb, var(--c) 35%, transparent), 0 16px 40px rgba(0,0,0,.6); backdrop-filter: blur(12px); overflow: hidden; }
+        .pz-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--c); }
+        .pz-rosa { --c: #ff2d8a; } .pz-azul { --c: #22d3ee; } .pz-verde { --c: #4dff7a; }
+        .pz-head { display: flex; align-items: center; gap: 12px; }
+        .pz-ico { font-size: 1.8em; width: 52px; height: 52px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+        .pz-head h4 { margin: 0; font-family: var(--font-t); font-weight: 800; font-size: clamp(.95em, 1.25vw, 1.15em); color: #fff; letter-spacing: .5px; }
+        .pz-head small { color: var(--mut2); font-weight: 600; font-size: .8em; }
+        .pz-tag { font-family: var(--font); font-size: .55em; font-weight: 900; letter-spacing: 1px; color: #060913; background: #34f5a0; padding: 2px 7px; border-radius: 8px; vertical-align: middle; }
+        .pz-itens { display: flex; flex-direction: column; gap: 8px; }
+        .pz-itens div { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid var(--line); }
+        .pz-itens b { color: #fff; font-size: .82em; letter-spacing: .5px; }
+        .pz-itens span { color: var(--mut2); font-size: .78em; font-weight: 700; text-align: right; }
+        .pz-itens em { color: var(--mut); font-style: normal; font-weight: 600; }
+        .pz-valor { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-radius: 14px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 30%, transparent), rgba(8,11,24,.9)); border: 1px solid var(--c); }
+        .pz-valor small { font-weight: 800; letter-spacing: 1px; color: #fff; font-size: .78em; }
+        .pz-valor b { font-family: var(--font-t); font-size: clamp(1.8em, 2.8vw, 2.6em); color: #ffd24a; text-shadow: 0 0 14px rgba(255,210,74,.45); }
+        .pz-pg { text-align: center; font-size: .8em; font-weight: 700; color: var(--mut2); }
+        .pz-pg b { color: #fff; }
+        .pz-escada { margin-top: auto; flex: 1; min-height: 150px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; }
+        .pz-escada div { height: var(--h); min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 1px; padding: 8px 4px; border-radius: 12px 12px 6px 6px; background: linear-gradient(180deg, rgba(77,255,122,.22), rgba(8,11,24,.6)); border: 1px solid rgba(77,255,122,.6); }
+        .pz-escada small { font-size: .62em; font-weight: 800; color: var(--mut2); }
+        .pz-escada b { font-family: var(--font-t); font-size: 1.7em; line-height: 1; color: #ffe100; }
+        .pz-escada span { font-size: .62em; font-weight: 700; color: var(--mut2); }
+        .pz-escada i { font-style: normal; margin-top: 6px; padding: 3px 6px; border-radius: 8px; background: #4dff7a; color: #0a0f1c; font-weight: 900; font-size: .78em; white-space: nowrap; }
+        .grid-potencial .item-potencial { min-width: 120px; }
+        .item-potencial.destaque .valor { white-space: nowrap; font-size: clamp(1.3em, 1.9vw, 1.8em); }
+        .pz-itens div { flex-wrap: wrap; } .pz-itens span { margin-left: auto; }
+        .pz-itens .pz-col { flex: 0 0 70px; margin-left: 0; text-align: center; }
+        .pz-itens div > .pz-col:first-of-type { margin-left: auto; }
+        .pz-itens .pz-cab { background: transparent; border: none; padding: 0 12px; }
+        .pz-itens .pz-cab b, .pz-itens .pz-cab span { font-size: .66em; letter-spacing: 1px; color: var(--mut); }
+        .pz-itens .pz-n { font-family: var(--font-t); font-size: 1.15em; color: #fff; }
+        .pz-itens .pz-v { color: #ffd24a; }
+        .pz-itens div:not(.pz-cab) { flex-wrap: nowrap; }
+        @media (max-width:850px) {
+            .pz-grid { grid-template-columns: 1fr; gap: 14px; flex: none; }
+            .pz-card { padding: 14px; }
+            .pz-escada { min-height: 140px; }
+        }
+        /* Botão PRÊMIOS EXTRA BLACK (mesma cor do Ganho Máx Black dos gerentes) */
+        .tab-btn.tab-black:not(.active) { color: #ffb347; }
+        .tab-btn.tab-black:not(.active) svg { stroke: #ffb347; }
+        .tab-btn.tab-black.active { background: linear-gradient(135deg, #ff8c00 0%, #ff0055 55%, #9b00e8 100%); color: #fff; box-shadow: 0 6px 22px rgba(255,90,0,.4); }
+        .tab-black .lbl-curto { display: none; }
+        @media (max-width:850px) {
+            .tab-black .lbl-longo { display: none; }
+            .tab-black .lbl-curto { display: inline; }
+            .tab-btn.tab-black.active { background: transparent !important; box-shadow: none !important; color: #ff8c00 !important; }
+            .tab-btn.tab-black.active svg { stroke: #ff8c00; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-box"></div>
+
+<div id="bg-clouds"></div>
+
+<!-- FUMAÇA BLACK -->
+<div class="fumaca" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+<!-- BOTÃO DE SOM -->
+<button id="btn-som" type="button" onclick="alternarSom()" title="Ligar/desligar efeitos sonoros" aria-label="Ligar ou desligar efeitos sonoros" data-html2canvas-ignore="true">🔊</button>
+
+<!-- FUMAÇA DE PALCO (TRANSIÇÃO ENTRE ABAS) -->
+<canvas id="fumaca-palco" aria-hidden="true"></canvas>
+
+<!-- INTRO BLACK (1x por sessão) -->
+<div id="intro-black" onclick="cliqueIntro()">
+    <div class="ib-fumaca"><span></span><span></span><span></span></div>
+    <button class="ib-start" type="button" aria-label="Entrar no dashboard">
+        <span class="ib-start-anel"></span>
+        <span class="ib-start-txt">▶ ENTRAR NA BLACK</span>
+        <small>🔊</small>
+    </button>
+    <div class="ib-conteudo">
+        <div class="ib-eyebrow">REGIONAL CAMPO BOM APRESENTA</div>
+        <div class="ib-titulo"><span>BLACK</span><small>DAS</small><span>BLACK'S</span></div>
+        <div class="ib-linha"></div>
+        <div class="ib-sub">NSL SÊNIOR EDIÇÃO ESPECIAL</div>
+    </div>
+</div>
+
+
+<!-- CORTINA DE LOGIN RESTRITO -->
+<div id="login-overlay">
+    <div class="card-maximized">
+        <button class="btn-fechar-login" onclick="fecharLogin()" aria-label="Fechar">&times;</button>
+        <div class="lock-ico">🔒</div>
+        <h2 class="login-titulo">ACESSO RESTRITO</h2>
+        <p class="login-sub">Insira as suas credenciais para acessar esta área.</p>
+        <input type="text" id="input-usuario" class="input-login" placeholder="LOGIN: ( USUÁRIO DO PORTAL )" style="text-transform: uppercase;" autocomplete="username">
+        <input type="password" id="input-senha" class="input-login" placeholder="SENHA: ( ID ATRÁS DO CRACHÁ )" autocomplete="current-password">
+        <button onclick="validarAcesso()" class="btn-top10" style="width:100%;">Entrar no Sistema</button>
+        <div id="login-erro">Credenciais inválidas. Tente novamente.</div>
+        <div id="login-loading">Sincronizando Base de Dados... ⏳</div>
+    </div>
+</div>
+
+<!-- TOPO GERAL -->
+<div id="topo-geral">
+    <div class="hero" data-html2canvas-ignore="true">
+        <h1 id="titulo-dashboard">🏆 REGIONAL CAMPO BOM - NSL SÊNIOR 🏆</h1>
+        <p>" O talento vence jogos, mas somente o trabalho em equipe vence campeonatos! "</p>
+    </div>
+
+    <div class="tab-container" id="tabContainer" data-html2canvas-ignore="true">
+        <button class="tab-btn active" id="btn-tab-ranking" onclick="trocarAba('ranking')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+            <span>Ranking</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-simulador" onclick="trocarAba('simulador')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="16" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="8" y2="18"></line><line x1="12" y1="18" x2="12" y2="18"></line><line x1="16" y1="18" x2="16" y2="18"></line></svg>
+            <span>Simulador</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-metas" onclick="trocarAba('metas')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            <span>Metas</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-colaborador" onclick="trocarAba('colaborador')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><line x1="6" y1="15" x2="10" y2="15"></line></svg>
+            <span>Cartão Colab.</span>
+        </button>
+        <button class="tab-btn tab-black" id="btn-tab-premios" onclick="trocarAba('premios')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+            <span class="lbl-longo">PRÊMIOS EXTRA BLACK</span><span class="lbl-curto">EXTRA BLACK</span>
+        </button>
+        <button class="tab-btn tab-logout" id="btn-logout" onclick="fazerLogout()" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Sair</span>
+        </button>
+    </div>
+</div>
+
+<!-- Banner exibido SOMENTE na imagem compartilhada -->
+<div id="share-banner">
+    <div class="sb-t" style="color:#ff0055;">🏆 NSL SÊNIOR</div>
+    <div class="sb-s" id="sb-sub">REGIONAL CAMPO BOM</div>
+    <div class="sb-g">O talento vence jogos, mas somente o trabalho em equipe vence campeonatos!</div>
+</div>
+
+<!-- ABA 1: RANKING -->
+<div id="aba-ranking" class="tab-content active">
+    <div class="painel-principal">
+        <div class="secao-podio">
+            <div class="podio podio-2" id="segundo-lugar" title="Clique para acelerar!">
+                <div class="avatar-circle avatar-2" id="avatar-2"></div>
+                <h2 class="pos-num" style="color:var(--silver);font-size:2em;text-shadow:0 0 15px rgba(192,192,192,.8);">2º</h2>
+                <div class="nome-senior" id="nome-2">Aguardando...</div>
+                <div class="badge-capsula badge-2">
+                    <div class="info-filial-podio" id="filial-2">--</div>
+                    <span class="badge-pontos" id="pontos-2">-- pts</span>
+                </div>
+            </div>
+
+            <div class="podio podio-1" id="primeiro-lugar" title="Clique para comemorar!">
+                <span class="podio-brilho" aria-hidden="true"></span>
+                <div class="trofeu-lado" aria-hidden="true">
+                    <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="tbCopa" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a4a52"/><stop offset="35%" stop-color="#1a1a1f"/><stop offset="100%" stop-color="#050506"/></linearGradient>
+                            <linearGradient id="tbAlca" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a3a42"/><stop offset="100%" stop-color="#08080a"/></linearGradient>
+                            <linearGradient id="tbOuro" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff6c2"/><stop offset="45%" stop-color="#ffd24a"/><stop offset="100%" stop-color="#b8740a"/></linearGradient>
+                            <radialGradient id="tbBrilho" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd24a" stop-opacity=".55"/><stop offset="100%" stop-color="#ffd24a" stop-opacity="0"/></radialGradient>
+                        </defs>
+                        <path d="M24 20 H9 C9 42 17 52 29 54" fill="none" stroke="#ffd24a" stroke-width="7.5" stroke-linecap="round" opacity=".9"/>
+                        <path d="M76 20 H91 C91 42 83 52 71 54" fill="none" stroke="#ffd24a" stroke-width="7.5" stroke-linecap="round" opacity=".9"/>
+                        <path d="M24 20 H9 C9 42 17 52 29 54" fill="none" stroke="url(#tbAlca)" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M76 20 H91 C91 42 83 52 71 54" fill="none" stroke="url(#tbAlca)" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M24 8 H76 V40 C76 62 63 74 50 74 C37 74 24 62 24 40 Z" fill="url(#tbCopa)" stroke="url(#tbOuro)" stroke-width="2"/>
+                        <rect x="23" y="6" width="54" height="5" rx="2" fill="url(#tbOuro)"/>
+                        <path d="M30 13 H38 V40 C38 54 42 62 48 67 C38 62 30 54 30 40 Z" fill="#ffffff" opacity=".13"/>
+                        <circle cx="50" cy="35" r="17" fill="url(#tbBrilho)" class="tb-aura"/>
+                        <polygon class="tb-estrela" points="50,21 54,31 64.5,31.8 56.5,38.6 59,48.8 50,43.3 41,48.8 43.5,38.6 35.5,31.8 46,31" fill="url(#tbOuro)" stroke="#fff3b0" stroke-width=".6"/>
+                        <rect x="44" y="74" width="12" height="15" fill="url(#tbCopa)" stroke="url(#tbOuro)" stroke-width="1.2"/>
+                        <rect x="31" y="88" width="38" height="8" rx="2.5" fill="url(#tbCopa)" stroke="url(#tbOuro)" stroke-width="1.2"/>
+                        <rect x="23" y="96" width="54" height="14" rx="3" fill="#050506" stroke="url(#tbOuro)" stroke-width="1.8"/>
+                        <rect x="38" y="100" width="24" height="6" rx="1.5" fill="url(#tbOuro)"/>
+                    </svg>
+                </div>
+                <div class="avatar-circle avatar-1" id="avatar-1"></div>
+                <h2 class="pos-num" style="color:var(--gold);font-size:2.3em;text-shadow:0 0 15px rgba(255,215,0,.8);">1º</h2>
+                <div class="nome-senior" id="nome-1">Lendo...</div>
+                <div class="badge-capsula badge-1">
+                    <div class="info-filial-podio" id="filial-1">--</div>
+                    <span class="badge-pontos" id="pontos-1">-- pts</span>
+                </div>
+            </div>
+
+            <div class="podio podio-3" id="terceiro-lugar" title="Clique para vibrar!">
+                <div class="avatar-circle avatar-3" id="avatar-3"></div>
+                <h2 class="pos-num" style="color:var(--bronze);font-size:1.8em;text-shadow:0 0 15px rgba(205,127,50,.8);">3º</h2>
+                <div class="nome-senior" id="nome-3">Aguardando...</div>
+                <div class="badge-capsula badge-3">
+                    <div class="info-filial-podio" id="filial-3">--</div>
+                    <span class="badge-pontos" id="pontos-3">-- pts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="secao-lista-wrapper">
+            <input type="text" id="busca-ranking" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('ranking')" data-html2canvas-ignore="true">
+            <div class="secao-lista" id="lista-selecao-ranking">
+                <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+            </div>
+            <div id="texto-carregando">Conectando à planilha e sincronizando... 🚀</div>
+            <div id="aviso-erro"></div>
+            <div class="sync-container" id="rodape-sync" data-html2canvas-ignore="true">🟢 Aguardando sincronização...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 2: SIMULADOR DE GANHO -->
+<div id="aba-simulador" class="tab-content">
+    <div class="container-metas">
+        <div id="tela-selecao-simul" class="tela-selecao">
+            <div class="placeholder-compacto">
+                <strong>💰 SIMULADOR DE GANHO</strong> — selecione a sua filial para calcular a projeção financeira.
+            </div>
+            <div class="secao-lista-wrapper">
+                <input type="text" id="busca-simul" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('simul')">
+                <div class="secao-lista" id="lista-selecao-simul"></div>
+            </div>
+        </div>
+
+        <div id="tela-detalhe-simul" class="tela-detalhe">
+            <div class="topbar-detalhe" data-html2canvas-ignore="true">
+                <button class="btn-voltar" onclick="fecharDetalheSimulador()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Voltar
+                </button>
+            </div>
+            <div class="card-maximized" id="cardDetalheSimulador"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 3: CONSULTA DE METAS -->
+<div id="aba-metas" class="tab-content">
+    <div class="container-metas">
+        <div id="tela-selecao" class="tela-selecao">
+            <div class="placeholder-compacto">
+                <strong>🎯 VISUALIZAR METAS</strong> — selecione a sua filial para o detalhamento de metas.
+            </div>
+            <div class="secao-lista-wrapper">
+                <input type="text" id="busca-metas" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('metas')">
+                <div class="secao-lista" id="lista-selecao-metas"></div>
+            </div>
+        </div>
+
+        <div id="tela-detalhe" class="tela-detalhe">
+            <div class="topbar-detalhe" data-html2canvas-ignore="true">
+                <button class="btn-voltar" onclick="fecharDetalhe()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Voltar
+                </button>
+            </div>
+            <div class="card-maximized" id="cardDetalheMax"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 4: CARTÃO POR COLABORADOR -->
+<div id="aba-colaborador" class="tab-content">
+    <div class="container-metas">
+        <div id="tela-selecao-colab" class="tela-selecao">
+            <div style="display:flex; justify-content:center; margin-bottom: 12px;">
+                <button class="btn-top10" onclick="abrirTop10Global()" id="btnTop10Geral">🏆 TOP 10 COLABORADORES CARTÃO LUIZA</button>
+            </div>
+            <div class="placeholder-compacto">
+                <strong>💳 CARTÃO POR COLABORADOR</strong> — selecione a sua filial para gerenciar a equipe.
+            </div>
+            <div class="secao-lista-wrapper">
+                <input type="text" id="busca-colab" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('colab')">
+                <div class="secao-lista" id="lista-selecao-colab"></div>
+            </div>
+        </div>
+
+        <div id="tela-detalhe-colab" class="tela-detalhe">
+            <div class="topbar-detalhe" data-html2canvas-ignore="true">
+                <button class="btn-voltar" onclick="fecharDetalheColab()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Voltar
+                </button>
+            </div>
+            <div class="card-maximized" id="cardDetalheColab"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 5: PRÊMIOS EXTRA (TELA CHEIA) -->
+<div id="aba-premios" class="tab-content">
+    <div class="topbar-detalhe" style="max-width: 1400px; width: 100%; margin: 0 auto 8px auto; padding: 0 10px;" data-html2canvas-ignore="true">
+        <button class="btn-voltar" onclick="fecharPremios()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Voltar para o Menu
+        </button>
+    </div>
+
+    <div class="container-premios" style="margin: 0 auto;">
+        <div class="pz-titulo">🎁 PRÊMIOS EXTRAS · <span id="pz-mes">NOVEMBRO / 2026</span> · ASSISTENTE SÊNIOR</div>
+        <div class="pz-grid">
+            <!-- BLOCO DE SERVIÇOS CRÉDITO -->
+            <div class="pz-card pz-rosa">
+                <div class="pz-head"><span class="pz-ico">🛡️</span><div><h4>BLOCO DE SERVIÇOS CRÉDITO</h4><small>Entregou o bloco, Líder e Sênior ganham</small></div></div>
+                <div class="pz-itens">
+                    <div class="pz-cab"><b>SERVIÇO</b><span class="pz-col">CONTRATOS</span></div>
+                    <div><b>SUPER PROTEGIDO</b><span class="pz-col pz-n pz-v">8</span></div>
+                    <div><b>CASA PROTEGIDA</b><span class="pz-col pz-n pz-v">8</span></div>
+                    <div><b>PROTEÇÃO BEM-ESTAR</b><span class="pz-col pz-n pz-v">1</span></div>
+                </div>
+                <div class="pz-valor"><small>ENTREGOU OS 3</small><b>R$ 300</b></div>
+                <div class="pz-pg">💸 Pagamento via <b>Magalupay</b></div>
+            </div>
+            <!-- PULA PRA 15 CDC -->
+            <div class="pz-card pz-azul">
+                <div class="pz-head"><span class="pz-ico">🚀</span><div><h4>PULA PRA 15 CDC <span class="pz-tag">NOVO</span></h4><small>Meta alvo de venda CDC da loja</small></div></div>
+                <div class="pz-itens">
+                    <div><b>VENDA CDC DA LOJA</b><span>100% de atingimento</span></div>
+                    <div><b>GATILHO FPP</b><span>entregar o FPP da loja (100%)</span></div>
+                </div>
+                <div class="pz-valor"><small>100% DA META</small><b>R$ 250</b></div>
+                <div class="pz-pg">💸 Pagamento via <b>Magalupay</b></div>
+            </div>
+            <!-- CARTÃO LUIZA -->
+            <div class="pz-card pz-verde">
+                <div class="pz-head"><span class="pz-ico">💳</span><div><h4>CARTÃO LUIZA <span class="pz-tag">NOVO</span></h4><small>Cartões ativos no mês · fecha no último dia</small></div></div>
+                <div class="pz-escada">
+                    <div style="--h:40%"><small>FEZ</small><b>8</b><span>cartões</span><i>R$ 150</i></div>
+                    <div style="--h:60%"><small>FEZ</small><b>15</b><span>cartões</span><i>R$ 250</i></div>
+                    <div style="--h:80%"><small>FEZ</small><b>20</b><span>cartões</span><i>R$ 300</i></div>
+                    <div style="--h:100%"><small>FEZ</small><b>25</b><span>cartões</span><i>R$ 350</i></div>
+                </div>
+                <div class="pz-pg">🎫 Pagamento no <b>Ticket</b></div>
+            </div>
+        </div>
+
+        <div class="bloco-potencial-ganho">
+            <h3>🚀 Potencial de Ganho Máximo</h3>
+            <div class="grid-potencial">
+                <div class="item-potencial">
+                    <span class="label">NSL</span>
+                    <span class="sub-label">( METAS 115% + FPP )</span>
+                    <span class="valor">R$ 750,00</span>
+                </div>
+                <span class="plus">+</span>
+                <div class="item-potencial">
+                    <span class="label">BLOCO CRÉDITO</span>
+                    <span class="sub-label">( 3 SERVIÇOS )</span>
+                    <span class="valor">R$ 300,00</span>
+                </div>
+                <span class="plus">+</span>
+                <div class="item-potencial">
+                    <span class="label">PULA PRA 15 CDC</span>
+                    <span class="sub-label">( 100% + FPP )</span>
+                    <span class="valor">R$ 250,00</span>
+                </div>
+                <span class="plus">+</span>
+                <div class="item-potencial">
+                    <span class="label">CARTÃO LUIZA</span>
+                    <span class="sub-label">( 25 CARTÕES )</span>
+                    <span class="valor">R$ 350,00</span>
+                </div>
+                <span class="plus">+</span>
+                <div class="item-potencial">
+                    <span class="label">10 CASAS 36M</span>
+                    <span class="sub-label">( COMISSÃO 7,5% )</span>
+                    <span class="valor">R$ 449,25</span>
+                </div>
+                <span class="equals">=</span>
+                <div class="item-potencial destaque">
+                    <span class="label">TOTAL ESTIMADO</span>
+                    <span class="valor">R$ 2.099,25</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="lightbox" onclick="fecharLightbox()"><img id="lightbox-img" alt="Campanha ampliada"></div>
+
+<!-- BOTÃO FLUTUANTE INSTAGRAM -->
+<div class="share-container" id="share-container" data-html2canvas-ignore="true">
+    <div class="share-menu" id="shareMenu">
+        <button class="share-option" onclick="gerarImagem('feed')"><span>⬛</span> Post para Feed (1:1)</button>
+        <button class="share-option" onclick="gerarImagem('stories')"><span>📱</span> Post para Stories (9:16)</button>
+    </div>
+    <button class="share-btn" onclick="toggleShareMenu()" title="Compartilhar no Instagram" aria-label="Compartilhar no Instagram">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="white"/></svg>
+    </button>
+</div>
+
+<audio id="som-vitoria" src="senna.mp3" preload="auto"></audio>
+<audio id="som-prata" src="prata.mp3" preload="auto"></audio>
+<audio id="som-bronze" src="bronze.mp3" preload="auto"></audio>
+
+<script>
+    // ==========================================
+    // COLE A SUA NOVA URL DO GOOGLE AQUI DENTRO DAS ASPAS:
+    // ==========================================
+    const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzBRZf6LW32tvD5P01YoEkDjqo1mqQfl4wVnZ_hDjdjiY7Pqbk474SYeu3jwU75L-ea/exec';
+
+    // ==========================================
+    // VARIÁVEIS DE SEGURANÇA E ACESSO
+    // ==========================================
+    let cofreCredenciais = [];
+    let isMasterLogado = false;
+    let seniorLogadoFilial = null;
+    let seniorLogadoNome = null;
+    let mapaNomesQuadro = {};
+    let abaPendente = null;
+
+    // ==========================================
+    // EFEITOS VISUAIS (padrão Troféu Global)
+    // ==========================================
+    function showToast(msg, tipo = 'info', ms = 4200) {
+        const box = document.getElementById('toast-box');
+        const t = document.createElement('div');
+        t.className = 'toast ' + (tipo === 'ok' ? 'ok' : tipo === 'erro' ? 'erro' : '');
+        t.innerText = msg;
+        box.appendChild(t);
+        setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 450); }, ms);
+    }
+
+document.addEventListener('mousemove', function(e) {
+    const bg = document.getElementById('bg-clouds');
+    if(bg && window.innerWidth > 850) { // Aplica apenas no desktop
+        const moveX = (window.innerWidth / 2 - e.pageX) / 45;
+        const moveY = (window.innerHeight / 2 - e.pageY) / 45;
+        bg.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.05)`;
+    }
+});
+
+function criarEfeitosFundo() {
+    const bg = document.createElement('div'); 
+    bg.className = 'bg-efeito-cores'; 
+    document.body.prepend(bg);
+    
+    const mobile = window.innerWidth < 700; 
+    const nParticles = mobile ? 20 : 45; // Respingos de tinta soltos
+    
+    const coresSolidas = ['#00d2ff', '#9b00e8', '#ff0055', '#ff8c00', '#ffe100', '#34f5a0'];
+
+    // Gerar partículas de respingo vivas
+    for (let i = 0; i < nParticles; i++) {
+        let p = document.createElement('div'); 
+        p.style.position = 'absolute';
+        let size = Math.random() * 6 + 2; 
+        p.style.width = size + 'px'; 
+        p.style.height = size + 'px';
+        p.style.background = coresSolidas[Math.floor(Math.random() * coresSolidas.length)];
+        p.style.borderRadius = Math.random() > 0.5 ? '50%' : '30% 70% 70% 30% / 30% 30% 70% 70%';
+        p.style.left = Math.random() * 100 + 'vw'; 
+        p.style.top = Math.random() * 100 + 'vh';
+        p.style.boxShadow = `0 0 ${size*2}px ${p.style.background}`; 
+        p.style.animation = `flutuarParticula ${Math.random() * 15 + 10}s linear infinite alternate`; 
+        bg.appendChild(p);
+    }
+}
+    criarEfeitosFundo();
+
+let abaAtual = 'ranking';
+/* ===== FUMAÇA DE PALCO (jatos de CO2 de balada) ===== */
+const fumacaPalco = (function () {
+    const cv = document.getElementById('fumaca-palco');
+    const ctx = cv.getContext('2d');
+    const CORES = [[235,240,255],[235,240,255],[235,240,255],[200,120,255],[255,90,170],[90,220,255]];
+    const sprites = CORES.map(([r,g,b]) => {
+        const s = document.createElement('canvas'); s.width = s.height = 128;
+        const g2 = s.getContext('2d'), gr = g2.createRadialGradient(64,64,0,64,64,64);
+        gr.addColorStop(0, `rgba(${r},${g},${b},.42)`); gr.addColorStop(.45, `rgba(${r},${g},${b},.15)`); gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        g2.fillStyle = gr; g2.fillRect(0,0,128,128); return s;
+    });
+    let parts = [], rodando = false, inicio = 0, W = 0, H = 0, jatos = [];
+    function emitir(n) {
+        const esc = Math.min(W, H) / 800;
+        for (let i = 0; i < n; i++) {
+            const j = jatos[Math.floor(Math.random() * jatos.length)];
+            parts.push({
+                x: j + (Math.random() - .5) * 30 * esc, y: H + 20,
+                vx: (Math.random() - .5) * .12 * esc, vy: -(H * (0.0019 + Math.random() * 0.0011)),   // px por ms
+                r: (16 + Math.random() * 20) * esc, cresc: (.2 + Math.random() * .22) * esc,
+                vida: 0, max: 900 + Math.random() * 600, rot: Math.random() * 6.28, vr: (Math.random() - .5) * .0012,
+                spr: sprites[Math.random() < .7 ? 0 : 1 + Math.floor(Math.random() * (sprites.length - 1))]
+            });
+        }
+    }
+    let acum = 0;
+    function quadro(ts) {
+        const dt = Math.min(50, ts - (quadro.ult || ts)) || 16; quadro.ult = ts;
+        const t = ts - inicio;
+        if (t < 320) { acum += dt * (W < 700 ? .35 : .6); const n = Math.floor(acum); acum -= n; emitir(n); }
+        ctx.clearRect(0, 0, W, H);
+        const nev = t < 300 ? t / 300 : Math.max(0, 1 - (t - 300) / 900);
+        if (nev > 0) { const g = ctx.createLinearGradient(0, H, 0, 0); g.addColorStop(0, `rgba(210,215,240,${.20 * nev})`); g.addColorStop(.5, `rgba(150,130,200,${.08 * nev})`); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+        parts = parts.filter(p => p.vida < p.max);
+        for (const p of parts) {
+            p.vida += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= Math.pow(.9965, dt);
+            p.r += p.cresc * dt; p.rot += p.vr * dt;
+            const k = p.vida / p.max, a = k < .1 ? k / .1 : Math.max(0, 1 - (k - .1) / .9);
+            ctx.globalAlpha = a * .9; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+            ctx.drawImage(p.spr, -p.r, -p.r, p.r * 2, p.r * 2); ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+        if (parts.length || t < 400) requestAnimationFrame(quadro);
+        else { rodando = false; cv.style.display = 'none'; ctx.clearRect(0, 0, W, H); }
+    }
+    return function disparar() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        W = window.innerWidth; H = window.innerHeight;
+        cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const n = W < 700 ? 3 : 5; jatos = [...Array(n)].map((_, i) => W * (i + .5) / n);
+        cv.style.display = 'block'; inicio = performance.now(); quadro.ult = 0;
+        acum = 0; if (!rodando) { rodando = true; parts = []; requestAnimationFrame(quadro); }
+    };
+})();
+function efeitoTrocaAba() { fumacaPalco(); }
+/* ===== SOM: efeitos sintetizados (Web Audio) ===== */
+let somAtivo = true;
+try { somAtivo = localStorage.getItem('som_black') !== 'off'; } catch (e) {}
+let audioCtx = null, ruidoBuffer = null, busMaster = null, busReverb = null;
+function criarImpulso(ac, seg, decai) {
+    const len = ac.sampleRate * seg, imp = ac.createBuffer(2, len, ac.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decai); }
+    return imp;
+}
+function audio(forcar) {
+    if (!somAtivo) return null;
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const ac = audioCtx, len = ac.sampleRate * 3;
+            ruidoBuffer = ac.createBuffer(2, len, ac.sampleRate);
+            for (let c = 0; c < 2; c++) { const d = ruidoBuffer.getChannelData(c); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; }
+            // master com compressor (deixa tudo "cheio" sem estourar)
+            const comp = ac.createDynamicsCompressor();
+            comp.threshold.value = -16; comp.knee.value = 8; comp.ratio.value = 5; comp.attack.value = .004; comp.release.value = .3;
+            busMaster = ac.createGain(); busMaster.gain.value = VOLUME_GERAL;
+            busMaster.connect(comp).connect(ac.destination);
+            // reverb de "arena"
+            const conv = ac.createConvolver(); conv.buffer = criarImpulso(ac, 3.8, 2.6);
+            busReverb = ac.createGain(); busReverb.gain.value = .55;
+            busReverb.connect(conv).connect(busMaster);
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    } catch (e) { return null; }
+}
+let somTrim = 1;   // equaliza o volume entre as opções
+function saidaFx(ac, seco = 1, molhado = .6, pan = 0) {
+    const g = ac.createGain(); g.gain.value = somTrim; const p = ac.createStereoPanner ? ac.createStereoPanner() : null;
+    const ds = ac.createGain(), wt = ac.createGain(); ds.gain.value = seco; wt.gain.value = molhado;
+    if (p) { p.pan.value = pan; g.connect(p); p.connect(ds); p.connect(wt); } else { g.connect(ds); g.connect(wt); }
+    ds.connect(busMaster); wt.connect(busReverb);
+    return g;
+}
+function curvaDist(k) { const n = 2048, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i * 2 / n - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return c; }
+
+// ---- Arquivos opcionais: se existirem na pasta, são usados no lugar do som sintetizado
+const SOM_ARQUIVOS = { entrada: 'entrada.mp3', fumaca: 'fumaca.mp3' };
+const somArquivo = {};
+Object.entries(SOM_ARQUIVOS).forEach(([k, src]) => {
+    const a = new Audio(); a.preload = 'auto';
+    a.addEventListener('canplaythrough', () => { somArquivo[k] = a; }, { once: true });
+    a.addEventListener('error', () => {}, { once: true });
+    a.src = src;
+});
+function tocarArquivo(k) {
+    if (!somAtivo || !somArquivo[k]) return false;
+    try { const a = somArquivo[k]; a.currentTime = 0; a.volume = Math.min(1, VOLUME_GERAL * 1.6); a.play().catch(() => {}); return true; } catch (e) { return false; }
+}
+
+// ---- BRAAM de trailer (metais graves distorcidos + sub + impacto + cauda de reverb)
+function somBraam(atraso = 0, forca = 1, nota = 55) {
+    const ac = audio(); if (!ac) return;
+    const t0 = ac.currentTime + atraso, dur = 2.6;
+    const out = saidaFx(ac, .9, .7);
+    const vca = ac.createGain();
+    vca.gain.setValueAtTime(0.0001, t0); vca.gain.exponentialRampToValueAtTime(.55 * forca, t0 + .06);
+    vca.gain.setValueAtTime(.55 * forca, t0 + .5); vca.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+    lp.frequency.setValueAtTime(180, t0); lp.frequency.exponentialRampToValueAtTime(1600, t0 + .12); lp.frequency.exponentialRampToValueAtTime(380, t0 + dur);
+    const sh = ac.createWaveShaper(); sh.curve = curvaDist(6); sh.oversample = '4x';
+    sh.connect(lp).connect(vca).connect(out);
+    [[1, -9], [1, 9], [2, -5], [2, 6], [1.5, 0], [.5, 0]].forEach(([mult, det]) => {
+        const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = nota * mult; o.detune.value = det;
+        const g = ac.createGain(); g.gain.value = mult === .5 ? .5 : .22;
+        o.connect(g).connect(sh); o.start(t0); o.stop(t0 + dur + .1);
+    });
+    // sub drop
+    const sub = ac.createOscillator(); sub.type = 'sine';
+    sub.frequency.setValueAtTime(nota * 1.2, t0); sub.frequency.exponentialRampToValueAtTime(nota * .55, t0 + 1.6);
+    const gs = ac.createGain(); gs.gain.setValueAtTime(0.0001, t0); gs.gain.exponentialRampToValueAtTime(.9 * forca, t0 + .02); gs.gain.exponentialRampToValueAtTime(0.0001, t0 + 2);
+    sub.connect(gs).connect(saidaFx(ac, 1, .15)); sub.start(t0); sub.stop(t0 + 2.1);
+    // ataque (pancada de tambor grande)
+    const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+    const lpn = ac.createBiquadFilter(); lpn.type = 'lowpass'; lpn.frequency.setValueAtTime(3500, t0); lpn.frequency.exponentialRampToValueAtTime(200, t0 + .4);
+    const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(.8 * forca, t0 + .005); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + .5);
+    n.connect(lpn).connect(gn).connect(saidaFx(ac, .8, 1)); n.start(t0, Math.random()); n.stop(t0 + .6);
+}
+// ---- Subida (riser) com tom crescente + ruído, terminando no primeiro BRAAM
+function somRiser(atraso = 0, dur = 1) {
+    const ac = audio(); if (!ac) return;
+    const t0 = ac.currentTime + atraso, out = saidaFx(ac, .7, .9);
+    const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.5;
+    bp.frequency.setValueAtTime(400, t0); bp.frequency.exponentialRampToValueAtTime(9000, t0 + dur);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(.5, t0 + dur * .97); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + .03);
+    n.connect(bp).connect(g).connect(out); n.start(t0); n.stop(t0 + dur + .1);
+    const o = ac.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(80, t0); o.frequency.exponentialRampToValueAtTime(880, t0 + dur);
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(400, t0); lp.frequency.exponentialRampToValueAtTime(5000, t0 + dur);
+    const go = ac.createGain(); go.gain.setValueAtTime(0.0001, t0); go.gain.exponentialRampToValueAtTime(.12, t0 + dur * .97); go.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + .03);
+    o.connect(lp).connect(go).connect(out); o.start(t0); o.stop(t0 + dur + .1);
+}
+// ---- Swell reverso (cresce de baixo e "suga") antes do TROFÉU GLOBAL
+function somSwell(atraso = 0, dur = 1.2) {
+    const ac = audio(); if (!ac) return;
+    const t0 = ac.currentTime + atraso;
+    const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+    const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(.35, t0 + dur); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + .04);
+    n.connect(hp).connect(g).connect(saidaFx(ac, .6, .8)); n.start(t0); n.stop(t0 + dur + .1);
+}
+// ---- Final dourado: acorde grande e brilhante com cauda longa
+function somFinal(atraso = 0) {
+    const ac = audio(); if (!ac) return;
+    const t0 = ac.currentTime + atraso, out = saidaFx(ac, .55, 1);
+    [110, 164.8, 220, 277.2, 329.6, 440, 659.3].forEach((f, i) => {
+        ['sawtooth', 'triangle'].forEach((tipo, j) => {
+            const o = ac.createOscillator(); o.type = tipo; o.frequency.value = f; o.detune.value = j ? 6 : -6;
+            const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(600, t0); lp.frequency.exponentialRampToValueAtTime(4200, t0 + .25); lp.frequency.exponentialRampToValueAtTime(900, t0 + 3);
+            const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(i < 2 ? .1 : .055, t0 + .05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 3.2);
+            o.connect(lp).connect(g).connect(out); o.start(t0); o.stop(t0 + 3.3);
+        });
+    });
+    somBraam(atraso, .7, 55);
+}
+// ---- Jatos de CO2: 3 disparos em sequência, abertos no estéreo, com reverb de casa de show
+function fumacaTriplo() {
+    const ac = audio(); if (!ac) return;
+    [[0, -.7], [.09, .7], [.18, 0]].forEach(([d, pan], idx) => {
+        const t0 = ac.currentTime + .02 + d, dur = 1.9 - idx * .15;
+        const out = saidaFx(ac, .85, .55, pan);
+        const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+        const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+        const pk = ac.createBiquadFilter(); pk.type = 'peaking'; pk.Q.value = 1.2; pk.gain.value = 9;
+        pk.frequency.setValueAtTime(4200, t0); pk.frequency.exponentialRampToValueAtTime(2400, t0 + dur);
+        const g = ac.createGain();
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(.75, t0 + .015);
+        g.gain.setValueAtTime(.7, t0 + .5); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        n.connect(hp).connect(pk).connect(g).connect(out); n.start(t0, Math.random() * 1.5); n.stop(t0 + dur + .05);
+        // "pop" da válvula abrindo
+        const b = ac.createBufferSource(); b.buffer = ruidoBuffer;
+        const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700;
+        const gb = ac.createGain(); gb.gain.setValueAtTime(0.0001, t0); gb.gain.exponentialRampToValueAtTime(.9, t0 + .006); gb.gain.exponentialRampToValueAtTime(0.0001, t0 + .22);
+        b.connect(lp).connect(gb).connect(out); b.start(t0, Math.random()); b.stop(t0 + .25);
+    });
+}
+// Sequência completa da entrada
+function entradaTrailer() {
+    somRiser(0, 1);
+    somBraam(.95, 1, 55);      // BLACK
+    somBraam(1.75, 1.2, 49);   // BLACKS (mais grave)
+    somSwell(2.1, 1.2);
+    somFinal(3.3);             // TROFÉU GLOBAL
+}
+
+/* =========================================================
+   ESCOLHA DOS SONS  (troque aqui)
+   Entrada: 'trailer' | 'impacto' | 'balada' | 'gold'
+   Fumaça:  'triplo'  | 'unico'   | 'curto'
+   ========================================================= */
+const SOM_ENTRADA = 'impacto';
+const SOM_FUMACA = 'triplo';
+const VOLUME_GERAL = 0.4;   // 0.1 (baixinho) até 1.0 (máximo)
+
+// ---------- utilidades ----------
+function ruido(ac, t0, dur, cadeia, ganho, ataque, pan = 0, seco = .8, molhado = .6) {
+    const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(ganho, t0 + ataque); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    let no = n; cadeia.forEach(f => { no.connect(f); no = f; });
+    no.connect(g).connect(saidaFx(ac, seco, molhado, pan));
+    n.start(t0, Math.random() * 1.5); n.stop(t0 + dur + .05);
+}
+function filtro(ac, tipo, f, q = 1) { const b = ac.createBiquadFilter(); b.type = tipo; b.frequency.value = f; b.Q.value = q; return b; }
+function tom(ac, t0, f1, f2, dur, ganho, tipo = 'sine', seco = 1, molhado = .3) {
+    const o = ac.createOscillator(); o.type = tipo;
+    o.frequency.setValueAtTime(f1, t0); o.frequency.exponentialRampToValueAtTime(f2, t0 + dur * .8);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(ganho, t0 + .008); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g).connect(saidaFx(ac, seco, molhado)); o.start(t0); o.stop(t0 + dur + .05);
+}
+function whooshReverso(ac, t0, dur = .5, ganho = .35) {
+    const n = ac.createBufferSource(); n.buffer = ruidoBuffer;
+    const bp = filtro(ac, 'bandpass', 800, .8); bp.frequency.setValueAtTime(500, t0); bp.frequency.exponentialRampToValueAtTime(4000, t0 + dur);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(ganho, t0 + dur); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + .03);
+    n.connect(bp).connect(g).connect(saidaFx(ac, .7, .8)); n.start(t0); n.stop(t0 + dur + .1);
+}
+
+// ---------- ENTRADA 2: IMPACTO SECO (pancadas de cinema, sem zumbido) ----------
+function batidaCinema(ac, t0, forca = 1) {
+    whooshReverso(ac, t0 - .45, .45, .3 * forca);
+    tom(ac, t0, 95, 38, 1.6, .95 * forca, 'sine', 1, .25);                     // sub
+    tom(ac, t0, 180, 70, .5, .5 * forca, 'triangle', .9, .9);                  // tambor grave
+    ruido(ac, t0, .45, [filtro(ac, 'lowpass', 2500)], .7 * forca, .003, 0, .7, 1);  // pancada
+    [312, 517, 851, 1290].forEach((f, i) => tom(ac, t0, f, f * .98, 1.4 - i * .2, .09 * forca, 'sine', .5, 1)); // metal
+}
+function entradaImpacto() {
+    const ac = audio(); if (!ac) return; const t = ac.currentTime + .05;
+    batidaCinema(ac, t + .9, .9); batidaCinema(ac, t + 1.7, 1.1); batidaCinema(ac, t + 3.3, 1.25);
+}
+
+// ---------- ENTRADA 3: BALADA (virada de caixa acelerando + drop) ----------
+function caixa(ac, t0, ganho) {
+    ruido(ac, t0, .12, [filtro(ac, 'bandpass', 1900, .9)], ganho, .002, 0, .9, .35);
+    tom(ac, t0, 220, 160, .09, ganho * .5, 'triangle', .9, .2);
+}
+function bumbo(ac, t0, ganho = 1) { tom(ac, t0, 150, 42, .45, ganho, 'sine', 1, .1); ruido(ac, t0, .03, [filtro(ac, 'lowpass', 3000)], ganho * .4, .001, 0, 1, 0); }
+function entradaBalada() {
+    const ac = audio(); if (!ac) return; const t = ac.currentTime + .05, drop = t + 3.3;
+    // virada acelerando até o drop
+    let x = t, passo = .32, i = 0;
+    while (x < drop - .03) { caixa(ac, x, Math.min(.55, .12 + i * .012)); x += passo; passo = Math.max(.045, passo * .9); i++; }
+    // subida
+    const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(110, t + 1); o.frequency.exponentialRampToValueAtTime(1760, drop);
+    const lp = filtro(ac, 'lowpass', 400, 4); lp.frequency.setValueAtTime(300, t + 1); lp.frequency.exponentialRampToValueAtTime(6000, drop);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t + 1); g.gain.exponentialRampToValueAtTime(.12, drop - .02); g.gain.exponentialRampToValueAtTime(0.0001, drop);
+    o.connect(lp).connect(g).connect(saidaFx(ac, .8, .5)); o.start(t + 1); o.stop(drop + .05);
+    ruido(ac, t + 1, drop - t - 1, [filtro(ac, 'highpass', 3000)], .25, drop - t - 1.05, 0, .6, .6);
+    // DROP: bumbo 4x4 + baixo + prato + acorde
+    for (let k = 0; k < 5; k++) bumbo(ac, drop + k * .47, k ? .8 : 1);
+    ruido(ac, drop, 2.2, [filtro(ac, 'highpass', 5000)], .35, .005, 0, .6, 1);
+    [55, 110].forEach(f => { const b = ac.createOscillator(); b.type = 'sawtooth'; b.frequency.value = f; const bl = filtro(ac, 'lowpass', 300, 2); const bg = ac.createGain(); bg.gain.setValueAtTime(0.0001, drop); bg.gain.exponentialRampToValueAtTime(.18, drop + .02); bg.gain.exponentialRampToValueAtTime(0.0001, drop + 2.2); b.connect(bl).connect(bg).connect(saidaFx(ac, 1, .2)); b.start(drop); b.stop(drop + 2.3); });
+    [220, 261.6, 329.6, 392].forEach(f => tom(ac, drop, f, f, 1.6, .06, 'sawtooth', .6, 1));
+}
+
+// ---------- ENTRADA 4: BLACK GOLD (tapete escuro + bumbo + sinos dourados) ----------
+function entradaGold() {
+    const ac = audio(); if (!ac) return; const t = ac.currentTime + .05;
+    // tapete escuro crescendo
+    [55, 65.4, 82.4, 110].forEach((f, i) => ['sawtooth', 'sawtooth'].forEach((tp, j) => {
+        const o = ac.createOscillator(); o.type = tp; o.frequency.value = f; o.detune.value = j ? 8 : -8;
+        const lp = filtro(ac, 'lowpass', 200, 1); lp.frequency.setValueAtTime(150, t); lp.frequency.exponentialRampToValueAtTime(1200, t + 3.3); lp.frequency.exponentialRampToValueAtTime(300, t + 5.5);
+        const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.05, t + 3.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 5.6);
+        o.connect(lp).connect(g).connect(saidaFx(ac, .6, .9)); o.start(t); o.stop(t + 5.7);
+    }));
+    tom(ac, t + .9, 80, 36, 1.8, .7, 'sine', 1, .4);
+    tom(ac, t + 1.7, 75, 33, 2, .85, 'sine', 1, .4);
+    // sinos dourados
+    tom(ac, t + 3.3, 70, 32, 2.2, .9, 'sine', 1, .4);
+    [1046.5, 1318.5, 1568, 2093, 2637].forEach((f, i) => [1, 2.76, 5.4].forEach((h, j) => tom(ac, t + 3.3 + i * .09, f * h, f * h, 2.6 - j * .7, (.05 / (j + 1)), 'sine', .4, 1)));
+}
+
+// ---------- FUMAÇA 2: JATO ÚNICO LONGO ----------
+function fumacaUnico() {
+    const ac = audio(); if (!ac) return; const t0 = ac.currentTime + .02;
+    [-.5, .5].forEach(pan => {
+        const pk = filtro(ac, 'peaking', 3800, 1); pk.gain.value = 8; pk.frequency.setValueAtTime(4000, t0); pk.frequency.exponentialRampToValueAtTime(2000, t0 + 2.6);
+        ruido(ac, t0, 2.6, [filtro(ac, 'highpass', 700), pk], .5, .03, pan, .8, .5);
+    });
+    ruido(ac, t0, .25, [filtro(ac, 'lowpass', 600)], .7, .005, 0, .9, .4);
+}
+// ---------- FUMAÇA 3: RAJADA CURTA ----------
+function fumacaCurto() {
+    const ac = audio(); if (!ac) return; const t0 = ac.currentTime + .02;
+    ruido(ac, t0, .8, [filtro(ac, 'highpass', 1200), filtro(ac, 'peaking', 4500, 1)], .6, .01, 0, .9, .5);
+    ruido(ac, t0, .18, [filtro(ac, 'lowpass', 700)], .6, .004, 0, .9, .3);
+}
+
+// ---------- despachantes ----------
+function somEntrada() {
+    if (tocarArquivo('entrada')) return;
+    const op = { trailer: [entradaTrailer, .65], impacto: [entradaImpacto, 1], balada: [entradaBalada, 1.35], gold: [entradaGold, 1] }[SOM_ENTRADA] || [entradaTrailer, .65];
+    somTrim = op[1]; op[0](); somTrim = 1;
+}
+function somFumaca() {
+    if (tocarArquivo('fumaca')) return;
+    const op = { triplo: [fumacaTriplo, .55], unico: [fumacaUnico, 1.1], curto: [fumacaCurto, 2.2] }[SOM_FUMACA] || [fumacaTriplo, .55];
+    somTrim = op[1]; op[0](); somTrim = 1;
+}
+
+function alternarSom() {
+    somAtivo = !somAtivo;
+    try { localStorage.setItem('som_black', somAtivo ? 'on' : 'off'); } catch (e) {}
+    atualizarBotaoSom();
+    showToast(somAtivo ? '🔊 Efeitos sonoros ligados' : '🔇 Efeitos sonoros desligados', 'info', 1800);
+}
+function atualizarBotaoSom() { const b = document.getElementById('btn-som'); b.textContent = somAtivo ? '🔊' : '🔇'; b.classList.toggle('mudo', !somAtivo); }
+atualizarBotaoSom();
+
+// Troca de aba: só a fumaça visual (som da fumaça apenas na abertura) -> efeitoTrocaAba definida acima
+
+
+/* ===== DESBLOQUEIO DE ÁUDIO NO CELULAR (iPhone/Android) =====
+   No 1º toque: retoma o áudio, toca um som vazio e um <audio> silencioso
+   (isso faz o som sair mesmo com o iPhone na chave de silencioso). */
+let audioDesbloqueado = false;
+const SILENCIO_WAV = 'data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+let audioSilencio = null;
+function desbloquearAudio() {
+    if (audioDesbloqueado || !somAtivo) return;
+    audioDesbloqueado = true;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    try {
+        audioSilencio = new Audio(SILENCIO_WAV); audioSilencio.loop = true; audioSilencio.volume = 0.01;
+        audioSilencio.setAttribute('playsinline', ''); audioSilencio.play().catch(() => {});
+        setTimeout(() => { try { audioSilencio.pause(); } catch (e) {} }, 12000);
+    } catch (e) {}
+    const ac = audio();
+    if (ac) { try { const b = ac.createBuffer(1, 1, 22050), s = ac.createBufferSource(); s.buffer = b; s.connect(ac.destination); s.start(0); } catch (e) {} }
+}
+['touchstart', 'touchend', 'pointerdown', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { capture: true, passive: true }));
+
+let introTimer = null;
+function cliqueIntro() {
+    const ib = document.getElementById('intro-black');
+    if (!ib.classList.contains('rodando')) return iniciarIntro();
+    if (performance.now() - introInicio < 1500) return;   // ignora o mesmo clique que acabou de iniciar
+    fecharIntro();   // segundo clique pula
+}
+let introInicio = 0;
+function iniciarIntro() {
+    const ib = document.getElementById('intro-black');
+    if (ib.classList.contains('rodando') || ib.classList.contains('saindo')) return;   // nunca inicia 2x
+    introInicio = performance.now();
+    ib.classList.add('rodando');
+    desbloquearAudio();
+    audio();
+    somEntrada();
+    introTimer = setTimeout(fecharIntro, 5600);
+}
+function fecharIntro() {
+    const ib = document.getElementById('intro-black');
+    if (!ib.classList.contains('show') || ib.classList.contains('saindo')) return;
+    clearTimeout(introTimer);
+    try { sessionStorage.setItem('intro_black_vista', '1'); } catch (e) {}
+    ib.classList.add('saindo');
+    fumacaPalco(); somFumaca();
+    setTimeout(() => { ib.classList.remove('show', 'saindo', 'rodando'); }, 1300);
+}
+(function introBlack() {
+    let visto = false;
+    try { visto = sessionStorage.getItem('intro_black_vista') === '1'; } catch (e) {}
+    if (visto) return;
+    const ib = document.getElementById('intro-black');
+    ib.classList.add('show');
+    // Tenta começar sozinho COM som. Se o navegador bloquear o áudio, mostra o botão "Entrar na Black".
+    if (!somAtivo) { iniciarIntro(); return; }
+    const ac = audio();
+    const tentar = () => { if (ac && ac.state === 'running') { iniciarIntro(); return true; } return false; };
+    if (tentar()) return;
+    if (ac) ac.resume().then(tentar).catch(() => {});
+    setTimeout(() => { if (!ib.classList.contains('rodando')) ib.classList.add('pedir-clique'); }, 250);
+})();
+// Qualquer tecla também inicia a intro
+document.addEventListener('keydown', e => {
+    const ib = document.getElementById('intro-black');
+    if (ib.classList.contains('show') && !ib.classList.contains('rodando') && e.key !== 'Escape') iniciarIntro();
+}, { once: false });
+
+    function abrirLightbox(src) {
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').classList.add('show');
+    }
+    function fecharLightbox() { document.getElementById('lightbox').classList.remove('show'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharLightbox(); });
+
+    function animarAneisEBarras(r) {
+        setTimeout(() => {
+            r.querySelectorAll('.ring-fg').forEach(c => {
+                const cl = 2 * Math.PI * 54;
+                c.style.strokeDasharray = cl;
+                c.style.strokeDashoffset = cl * (1 - parseFloat(c.dataset.pct || 0));
+            });
+            r.querySelectorAll('.comp-linha .cb i').forEach(b => { b.style.width = b.dataset.w + '%'; });
+        }, 80);
+    }
+
+    function linhaComponente(n, p, m, d) {
+        const pc = m > 0 ? Math.min(p / m * 100, 100) : 0;
+        const c = pc >= 80 ? 'linear-gradient(90deg,#22d3ee,#34f5a0)' : pc >= 40 ? 'linear-gradient(90deg,#ff9f1c,#ffd24a)' : 'linear-gradient(90deg,#ff5470,#ff9f1c)';
+        return `
+        <div class="comp-linha">
+            <div class="cn">${n}${d ? `<br><small style="color:var(--mut);font-weight:600;">${d}</small>` : ''}</div>
+            <div class="cb"><i data-w="${pc.toFixed(1)}" style="background:${c};"></i></div>
+            <div class="cv">${p.toFixed(1).replace('.', ',')} <small>/ ${m.toFixed(2).replace('.', ',')} pts</small></div>
+        </div>`;
+    }
+
+    // ==========================================
+    // LOGIN / ACESSO
+    // ==========================================
+    document.addEventListener('keydown', function(event) {
+        let overlay = document.getElementById('login-overlay');
+        if (overlay.style.display === 'flex' && event.key === 'Enter') {
+            validarAcesso();
+        }
+    });
+
+    function aplicarTravaSenior() {
+        if (!seniorLogadoFilial || isMasterLogado) return;
+
+        let listasParaTravar = [
+            '#lista-selecao-simul .item-lista',
+            '#lista-selecao-metas .item-lista',
+            '#lista-selecao-colab .item-lista'
+        ];
+
+        listasParaTravar.forEach(seletor => {
+            document.querySelectorAll(seletor).forEach(item => {
+                let texto = item.innerText.toLowerCase();
+                if(!texto.includes('fl ' + seniorLogadoFilial.toLowerCase())) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'flex';
+                }
+            });
+        });
+    }
+
+    // ==========================================
+    // REGISTRO DE ACESSO (mesmo padrão do painel dos gerentes)
+    // Envia 1 log por filial por sessão do navegador. O Master não é registrado.
+    // ==========================================
+    function registrarAcesso(filial, login) {
+        if (!filial || filial === 'ADMIN') return;
+        const chave = 'log_enviado_senior_' + filial;
+        try { if (sessionStorage.getItem(chave)) return; } catch (e) {}
+        try {
+            fetch(URL_WEB_APP, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=log_acesso&filial=${encodeURIComponent(filial)}&login=${encodeURIComponent(login || '')}&painel=SENIOR`
+            });
+            try { sessionStorage.setItem(chave, 'true'); } catch (e) {}
+        } catch (e) {}
+    }
+
+    function fazerLogout() {
+        isMasterLogado = false;
+        seniorLogadoFilial = null;
+        seniorLogadoNome = null;
+        abaPendente = null;
+
+        document.getElementById('share-container').style.display = 'flex';
+        if(document.getElementById('btnTop10Geral')) {
+            document.getElementById('btnTop10Geral').style.display = '';
+        }
+        document.getElementById('btn-logout').style.display = 'none';
+
+        document.querySelectorAll('.busca-ranking').forEach(input => input.value = '');
+
+        document.querySelectorAll('.item-lista').forEach(item => {
+            item.style.display = 'flex';
+        });
+
+        document.getElementById('tela-detalhe-simul').style.display = 'none';
+        document.getElementById('tela-selecao-simul').style.display = 'block';
+
+        document.getElementById('tela-detalhe').style.display = 'none';
+        document.getElementById('tela-selecao').style.display = 'block';
+
+        document.getElementById('tela-detalhe-colab').style.display = 'none';
+        document.getElementById('tela-selecao-colab').style.display = 'block';
+
+        document.getElementById('input-usuario').value = '';
+        document.getElementById('input-senha').value = '';
+
+        trocarAba('ranking');
+    }
+
+    function trocarAba(nomeAba) {
+        if ((nomeAba === 'simulador' || nomeAba === 'metas' || nomeAba === 'colaborador') && !isMasterLogado && !seniorLogadoFilial) {
+            abaPendente = nomeAba;
+            let overlay = document.getElementById('login-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+            return;
+        }
+        executarTrocaAba(nomeAba);
+    }
+
+    function fecharLogin() {
+        let overlay = document.getElementById('login-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        abaPendente = null;
+        document.getElementById('login-erro').style.display = 'none';
+    }
+
+    function validarAcesso() {
+        let usuarioDigitado = document.getElementById('input-usuario').value.trim().toUpperCase();
+        let senhaDigitada = document.getElementById('input-senha').value.trim();
+        let erroBox = document.getElementById('login-erro');
+
+        if(usuarioDigitado === '' || senhaDigitada === '') {
+            erroBox.innerText = "Por favor, preencha o Login e a Senha.";
+            erroBox.style.display = 'block';
+            return;
+        }
+
+        if (usuarioDigitado === 'ALR_SOARES' && senhaDigitada === '251148') {
+            isMasterLogado = true;
+            seniorLogadoFilial = null;
+            seniorLogadoNome = null;
+            const destinoMaster = abaPendente;   // guarda a aba antes do fecharLogin() limpar
+            fecharLogin();
+
+            document.getElementById('btn-logout').style.display = 'flex';
+
+            if(destinoMaster) {
+                executarTrocaAba(destinoMaster);
+                abaPendente = null;
+            }
+            return;
+        }
+
+        let userAutorizado = cofreCredenciais.find(cred => cred.login === usuarioDigitado && cred.senha === senhaDigitada);
+
+        if (userAutorizado) {
+            isMasterLogado = false;
+            seniorLogadoFilial = userAutorizado.filial;
+            seniorLogadoNome = userAutorizado.representante ? (userAutorizado.nome || null) : null;
+
+            registrarAcesso(userAutorizado.filial, userAutorizado.login);
+
+            aplicarTravaSenior();
+
+            if(document.getElementById('btnTop10Geral')) {
+                document.getElementById('btnTop10Geral').style.display = 'none';
+            }
+
+            document.getElementById('btn-logout').style.display = 'flex';
+            const destino = abaPendente;   // guarda a aba antes do fecharLogin() limpar
+            fecharLogin();
+
+            if(destino) {
+                executarTrocaAba(destino);
+                abaPendente = null;
+            }
+        } else {
+            erroBox.innerText = "Acesso Negado: Login ou Senha (ID) incorretos.";
+            erroBox.style.display = 'block';
+        }
+    }
+
+    function executarTrocaAba(nomeAba) {
+        if (nomeAba !== abaAtual) efeitoTrocaAba();
+        abaAtual = nomeAba;
+        const bsom = document.getElementById('btn-som'); if (bsom) bsom.style.display = nomeAba === 'ranking' ? '' : 'none';
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if(btn.id !== 'btn-logout') btn.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
+
+        document.getElementById('tabContainer').classList.remove('show-menu');
+        document.getElementById('shareMenu').classList.remove('show');
+
+        // Garante que o topo aparece em todas as abas, MENOS na de prêmios (que é tela cheia)
+        if (nomeAba !== 'premios') {
+            document.getElementById('topo-geral').style.display = 'block';
+        }
+
+        if (nomeAba === 'ranking') {
+            if(!isMasterLogado) document.getElementById('share-container').style.display = 'flex';
+            document.getElementById('btn-tab-ranking').classList.add('active');
+            document.getElementById('aba-ranking').classList.add('active');
+        } else if (nomeAba === 'simulador') {
+            document.getElementById('share-container').style.display = 'none';
+            document.getElementById('btn-tab-simulador').classList.add('active');
+            document.getElementById('aba-simulador').classList.add('active');
+        } else if (nomeAba === 'metas') {
+            document.getElementById('share-container').style.display = 'none';
+            document.getElementById('btn-tab-metas').classList.add('active');
+            document.getElementById('aba-metas').classList.add('active');
+        } else if (nomeAba === 'colaborador') {
+            document.getElementById('share-container').style.display = 'none';
+            document.getElementById('btn-tab-colaborador').classList.add('active');
+            document.getElementById('aba-colaborador').classList.add('active');
+        } else if (nomeAba === 'premios') {
+            document.getElementById('share-container').style.display = 'none';
+            document.getElementById('btn-tab-premios').classList.add('active');
+            document.getElementById('aba-premios').classList.add('active');
+            document.getElementById('topo-geral').style.display = 'none';
+        }
+        const abaEl = document.getElementById('aba-' + nomeAba);
+        if (abaEl) { abaEl.classList.remove('entrada-black'); void abaEl.offsetWidth; abaEl.classList.add('entrada-black'); }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function fecharPremios() {
+        document.getElementById('topo-geral').style.display = 'block';
+        trocarAba('ranking');
+    }
+
+    function obterUrlImagem(url) {
+        if (!url) return '';
+        let strUrl = url.toString().trim();
+        if (strUrl.includes('drive.google.com')) {
+            let id = '';
+            if (strUrl.includes('/d/')) id = strUrl.split('/d/')[1].split('/')[0];
+            else if (strUrl.includes('id=')) id = strUrl.split('id=')[1].split('&')[0];
+            if (id) {
+                return `https://lh3.googleusercontent.com/d/${id}=w800-h800-p`;
+            }
+        }
+        return strUrl;
+    }
+
+    const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+    const dataAtual = new Date();
+    // Mês forçado no título: NOVEMBRO/2026 até o mês real alcançar (em dezembro vira sozinho)
+    let mesTitulo = dataAtual.getMonth(), anoTitulo = dataAtual.getFullYear();
+    if (anoTitulo * 12 + mesTitulo < 2026 * 12 + 10) { mesTitulo = 10; anoTitulo = 2026; }
+    document.getElementById('titulo-dashboard').innerText = `🏆 NSL SÊNIOR EDIÇÃO BLACK DAS BLACK'S - ${meses[mesTitulo]} / ${anoTitulo} 🏆`;
+    document.getElementById('sb-sub').innerText = `REGIONAL CAMPO BOM • ${meses[mesTitulo]} ${anoTitulo}`;
+    document.title = `NSL Sênior - Regional Campo Bom - ${meses[mesTitulo]} ${anoTitulo}`;
+    { const pm = document.getElementById('pz-mes'); if (pm) pm.innerText = `${meses[mesTitulo]} / ${anoTitulo}`; }
+
+    let listaCompletaSeniores = [];
+    let filialAtiva = null;
+    let mapaColaboradoresGlobais = {};
+
+    function atualizarRelogioSincronizacao() {
+        let agora = new Date();
+        let horaStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${horaStr}`;
+    }
+
+    function toggleMenuMobile() {
+        document.getElementById('tabContainer').classList.toggle('show-menu');
+    }
+
+    function filtrarSelecao(contexto) {
+        let caixaBusca = document.getElementById('busca-' + contexto);
+        if (!caixaBusca) return;
+        let filtro = caixaBusca.value.toLowerCase();
+        let itens = document.querySelectorAll('#lista-selecao-' + contexto + ' .item-lista');
+        itens.forEach(item => {
+            let texto = item.querySelector('.nome-filial').innerText.toLowerCase();
+
+            if(seniorLogadoFilial && !isMasterLogado) {
+                if(!texto.includes('fl ' + seniorLogadoFilial.toLowerCase())) {
+                    item.style.display = 'none';
+                    return;
+                }
+            }
+
+            if (texto.includes(filtro)) item.style.display = 'flex';
+            else item.style.display = 'none';
+        });
+    }
+
+    function mostrarMensagemFlutuante(idElemento, texto, corHex) {
+        const el = document.getElementById(idElemento);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const msg = document.createElement('div');
+        msg.className = 'floating-msg';
+        msg.innerText = texto;
+        msg.style.color = corHex;
+        let x = rect.left + rect.width / 2, m = 140;
+        if (x < m) x = m;
+        if (x > window.innerWidth - m) x = window.innerWidth - m;
+        msg.style.left = x + 'px';
+        msg.style.top = (rect.top) + 'px';
+        if (window.innerWidth < 600) msg.style.fontSize = '1.2em';
+        document.body.appendChild(msg);
+        setTimeout(() => { if (msg.parentNode) msg.parentNode.removeChild(msg); }, 2500);
+    }
+
+    document.getElementById('primeiro-lugar').addEventListener('click', function() {
+        confetti({ particleCount: 140, spread: 85, origin: { y: 0.6 }, colors: ['#ffd24a', '#fff3b0', '#1a1a1f', '#000000', '#c27a0a'] });
+        mostrarMensagemFlutuante('primeiro-lugar', '🏆 O TOPO É SEU!!!', '#ffd24a');
+        const audioOuro = document.getElementById('som-vitoria');
+        const audioPrata = document.getElementById('som-prata');
+        const audioBronze = document.getElementById('som-bronze');
+        if(audioPrata) audioPrata.pause();
+        if(audioBronze) audioBronze.pause();
+        if (audioOuro && somAtivo) { audioOuro.currentTime = 0; audioOuro.play().catch(e => console.log("Áudio bloqueado.")); }
+    });
+
+    document.getElementById('segundo-lugar').addEventListener('click', () => {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#C0C0C0', '#E0E0E0', '#ffffff'] });
+        mostrarMensagemFlutuante('segundo-lugar', '🥈 ACELERAAA!', '#22d3ee');
+        const audioOuro = document.getElementById('som-vitoria');
+        const audioPrata = document.getElementById('som-prata');
+        const audioBronze = document.getElementById('som-bronze');
+        if(audioOuro) audioOuro.pause();
+        if(audioBronze) audioBronze.pause();
+        if (audioPrata && somAtivo) { audioPrata.currentTime = 0; audioPrata.play().catch(e => {}); }
+    });
+
+    document.getElementById('terceiro-lugar').addEventListener('click', () => {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#CD7F32', '#D2691E', '#ff7b00'] });
+        mostrarMensagemFlutuante('terceiro-lugar', '🥉 TÁ NO PÓDIO! BORA SUBIR!', '#ff9f1c');
+        const audioOuro = document.getElementById('som-vitoria');
+        const audioPrata = document.getElementById('som-prata');
+        const audioBronze = document.getElementById('som-bronze');
+        if(audioOuro) audioOuro.pause();
+        if(audioPrata) audioPrata.pause();
+        if (audioBronze && somAtivo) { audioBronze.currentTime = 0; audioBronze.play().catch(e => {}); }
+    });
+
+    // ==========================================
+    // FUNÇÕES DE CÁLCULO (INALTERADAS)
+    // ==========================================
+    function extrairNumero(val, isPerc = false) {
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return isPerc ? val * 100 : val;
+        let str = val.toString().trim().replace('%', '').replace('R$', '').trim();
+        if (str.includes(',') && str.includes('.')) {
+            let uPonto = str.lastIndexOf('.');
+            let uVirgula = str.lastIndexOf(',');
+            if (uVirgula > uPonto) str = str.replace(/\./g, '').replace(',', '.');
+            else str = str.replace(/,/g, '');
+        } else if (str.includes(',')) str = str.replace(',', '.');
+        let num = parseFloat(str);
+        if (isNaN(num)) return 0;
+        return num;
+    }
+
+    function formatarValor(val, isPerc, isMonetario = false) {
+        let num = parseFloat(val);
+        if (isNaN(num)) return "0";
+        if (isPerc) {
+            let formatado = num % 1 === 0 ? num.toString() : num.toFixed(1);
+            return formatado.replace('.', ',');
+        }
+        if (isMonetario) return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        else return num.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    }
+
+    function calcPerc(val) { return parseFloat(val) || 0; }
+
+    function formatarNome(nomeCompleto) {
+        if (!nomeCompleto) return "Sênior Não Informado";
+        let partes = nomeCompleto.trim().split(" ");
+        if (partes.length === 1) return partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
+        return (partes[0] + " " + partes[partes.length - 1]).toLowerCase().replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+    }
+
+    function formatarNomeWhats(nomeStr) {
+        if (!nomeStr) return "Colaborador";
+        let p = nomeStr.toString().trim().split(" ");
+        return p.map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ');
+    }
+
+    function formatarNomeColab(nomeCompleto) {
+        if (!nomeCompleto) return "COLABORADOR";
+        return nomeCompleto.toString().toUpperCase();
+    }
+
+    function limparChave(valor) {
+        if (!valor) return '';
+        return valor.toString().replace(/\D/g, '');
+    }
+
+    function getProgressStyle(percValue) {
+        let isQuase = (percValue >= 90 && percValue < 100);
+        return { cor: percValue >= 100 ? '#34f5a0' : (isQuase ? '#ff9f1c' : '#ff5470'), isQuase: isQuase, classe: isQuase ? 'pulsar-laranja' : '' };
+    }
+
+    function getMultiplicador(perc) {
+        if (perc < 90) return 0.00;
+        if (perc >= 90 && perc < 92.5) return 0.30;
+        if (perc >= 92.5 && perc < 95.0) return 0.50;
+        if (perc >= 95.0 && perc < 96.0) return 0.75;
+        if (perc >= 96.0 && perc < 97.0) return 0.80;
+        if (perc >= 97.0 && perc < 98.0) return 0.85;
+        if (perc >= 98.0 && perc < 99.0) return 0.90;
+        if (perc >= 99.0 && perc < 103.0) return 1.00;
+        if (perc >= 103.0 && perc < 106.0) return 1.05;
+        if (perc >= 106.0 && perc < 109.0) return 1.10;
+        if (perc >= 109.0 && perc < 112.0) return 1.15;
+        if (perc >= 112.0 && perc < 115.0) return 1.20;
+        if (perc >= 115.0) return 1.25;
+        return 0.00;
+    }
+
+    function iniciarAnimacoes() {
+        document.querySelectorAll('.animar-numero').forEach(el => {
+            let rawVal = parseFloat(el.getAttribute('data-valor')) || 0;
+            let tipo = el.getAttribute('data-tipo');
+            let isMonetario = el.getAttribute('data-monetario') === 'true';
+            let finalVal = rawVal;
+            let isQuase = el.getAttribute('data-quasela') === 'true';
+            let duracao = 1500;
+            let inicio = null;
+
+            function animar(timestamp) {
+                if (!inicio) inicio = timestamp;
+                let progresso = (timestamp - inicio) / duracao;
+                if (progresso > 1) progresso = 1;
+                let ease = 1 - Math.pow(1 - progresso, 3);
+                let valorAtual = finalVal * ease;
+                let formatado = formatarValorAnimacao(valorAtual, tipo ? tipo.includes('perc') : false, isMonetario);
+
+                if (tipo && tipo.includes('perc')) el.innerText = isQuase ? `🔥 QUASE LÁ! (${formatado}%)` : `${formatado}%`;
+                else el.innerText = formatado;
+
+                if (progresso < 1) requestAnimationFrame(animar);
+                else {
+                    let finalFormatado = formatarValorAnimacao(finalVal, tipo ? tipo.includes('perc') : false, isMonetario);
+                    if (tipo && tipo.includes('perc')) el.innerText = isQuase ? `🔥 QUASE LÁ! (${finalFormatado}%)` : `${finalFormatado}%`;
+                    else el.innerText = finalFormatado;
+                }
+            }
+            requestAnimationFrame(animar);
+        });
+        setTimeout(() => { document.querySelectorAll('.progress-fill').forEach(el => { el.style.width = el.getAttribute('data-target-width'); }); }, 50);
+    }
+
+    function formatarValorAnimacao(num, isPerc, isMonetario) {
+        if (isPerc) { let formatado = num % 1 === 0 ? num.toString() : num.toFixed(1); return formatado.replace('.', ','); }
+        if (isMonetario) return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        else return num.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    }
+
+    function mapearAbaIndicador(dadosAba, calcular105 = false) {
+        let mapa = {};
+        if (dadosAba && dadosAba.length > 0) {
+            for(let i = 1; i < dadosAba.length; i++) {
+                let linha = dadosAba[i];
+                if(!linha || linha.length === 0) continue;
+                let numF = limparChave(linha[0]);
+                if(numF) {
+                    let metaOriginal = extrairNumero(linha[1]);
+                    let metaFinal = calcular105 ? Math.ceil(metaOriginal * 1.05) : metaOriginal;
+                    mapa[numF] = { metaCalculada: metaFinal, realizado: extrairNumero(linha[2]), proj: extrairNumero(linha[3], true) };
+                }
+            }
+        }
+        return mapa;
+    }
+
+    function renderizarTela(json) {
+        let mapaCidades = {};
+        mapaNomesQuadro = {};
+        cofreCredenciais = [];
+        let dadosQuadro = json.quadro || [];
+
+        if (dadosQuadro.length > 0) {
+            // REGRA DA LINHA EM BRANCO:
+            // acima da 1ª linha totalmente vazia = quem representa a loja (nome/foto no ranking)
+            // abaixo dela = só tem acesso ao painel (login), não aparece no ranking
+            let jaTeveDados = false;
+            let abaixoDaLinhaVazia = false;
+            for(let i = 1; i < dadosQuadro.length; i++) {
+                let linha = dadosQuadro[i];
+                let linhaVazia = !linha || linha.every(cel => cel === null || cel === undefined || String(cel).trim() === '');
+                if (linhaVazia) { if (jaTeveDados) abaixoDaLinhaVazia = true; continue; }
+                jaTeveDados = true;
+                const representante = !abaixoDaLinhaVazia;
+                if(linha && linha.length > 0) {
+                    let f = limparChave(linha[0]);
+                    let c = linha.length > 1 && linha[1] ? linha[1].toString().trim() : '';
+                    let urlFotoRaw = '';
+                    if (linha.length > 11 && linha[11]) urlFotoRaw = linha[11].toString().trim();
+                    else { for(let col = linha.length - 1; col >= 2; col--) { if(linha[col] && linha[col].toString().includes('drive.google.com')) { urlFotoRaw = linha[col].toString().trim(); break; } } }
+
+                    let novaFoto = obterUrlImagem(urlFotoRaw);
+                    if(f && !representante) {
+                        if (!mapaCidades[f] && c) mapaCidades[f] = { cidade: c, foto: '' };
+                    } else if(f) {
+                        if (!mapaCidades[f]) mapaCidades[f] = { cidade: c, foto: novaFoto };
+                        else { if (novaFoto && novaFoto !== '') mapaCidades[f].foto = novaFoto; if (c && c.trim() !== '') mapaCidades[f].cidade = c; }
+                    }
+
+                    let filialAlvo = f;
+                    let senhaID = linha.length > 3 && linha[3] ? String(linha[3]).trim() : '';
+                    let loginPortal = linha.length > 5 && linha[5] ? String(linha[5]).trim().toUpperCase() : 'NULL';
+                    if (loginPortal === '') loginPortal = 'NULL';
+
+                    let nomeQuadro = linha.length > 4 && linha[4] ? String(linha[4]).trim().toUpperCase() : '';
+                    if(filialAlvo !== '' && senhaID !== '') {
+                        cofreCredenciais.push({ filial: filialAlvo, login: loginPortal, senha: senhaID, nome: nomeQuadro, representante: representante });
+                        if (nomeQuadro && representante) {
+                            if (!mapaNomesQuadro[filialAlvo]) mapaNomesQuadro[filialAlvo] = [];
+                            if (!mapaNomesQuadro[filialAlvo].includes(nomeQuadro)) mapaNomesQuadro[filialAlvo].push(nomeQuadro);
+                        }
+                    }
+                }
+            }
+        }
+
+        let mapaFpp = {};
+        if (json.fpp && json.fpp.length > 0) {
+            for(let i = 1; i < json.fpp.length; i++) {
+                let linha = json.fpp[i];
+                if(!linha || linha.length === 0) continue;
+                let numF = limparChave(linha[0]);
+                if(numF) {
+                    let atingimento = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
+                    mapaFpp[numF] = { carteiraMes: linha.length > 1 ? extrairNumero(linha[1]) : 0, metaRecebimento: linha.length > 3 ? extrairNumero(linha[3]) : 0, valorRecebido: linha.length > 4 ? extrairNumero(linha[4]) : 0, atingimento: atingimento >= 100 ? 100 : atingimento, elegivel: (atingimento >= 100) };
+                }
+            }
+        }
+
+        let mapaVenda1p = {};
+        let mapaCidadesVenda = {};
+        if (json.venda && json.venda.length > 0) {
+            for(let i = 1; i < json.venda.length; i++) {
+                let linha = json.venda[i];
+                if(!linha || linha.length === 0) continue;
+                let numF = limparChave(linha[0]);
+                if(numF) {
+                    if (linha.length > 1 && linha[1]) mapaCidadesVenda[numF] = linha[1].toString().trim();
+                    if (linha.length > 4) mapaVenda1p[numF] = extrairNumero(linha[4], true);
+                }
+            }
+        }
+
+        let mapaNps = {};
+        if (json.nps && json.nps.length > 0) {
+            for(let i = 1; i < json.nps.length; i++) {
+                let linha = json.nps[i];
+                if(!linha || linha.length === 0) continue;
+                let numF = limparChave(linha[0]);
+                if(numF && linha.length > 5) mapaNps[numF] = extrairNumero(linha[5]);
+            }
+        }
+
+        let vendedoresValidos = new Set();
+        try {
+            if (json.quadro_vendedor && json.quadro_vendedor.length > 0) {
+                for(let i = 1; i < json.quadro_vendedor.length; i++) {
+                    let linha = json.quadro_vendedor[i];
+                    if(linha && linha.length > 4) {
+                        let nome = linha[4] ? linha[4].toString().trim().toUpperCase() : '';
+                        if (nome) vendedoresValidos.add(nome);
+                    }
+                }
+            }
+        } catch(e) {}
+
+        mapaColaboradoresGlobais = {};
+        try {
+            if (json.ct_colaborador && json.ct_colaborador.length > 0) {
+                for(let i = 1; i < json.ct_colaborador.length; i++) {
+                    let linha = json.ct_colaborador[i];
+                    if(linha && linha.length > 0) {
+                        let numFilialLimpo = limparChave(linha[0]);
+                        let nomeColab = linha.length > 2 && linha[2] ? linha[2].toString().trim().toUpperCase() : '';
+
+                        if (numFilialLimpo && nomeColab && vendedoresValidos.has(nomeColab)) {
+                            if (!mapaColaboradoresGlobais[numFilialLimpo]) mapaColaboradoresGlobais[numFilialLimpo] = [];
+
+                            let jaExiste = mapaColaboradoresGlobais[numFilialLimpo].some(c => c.nomeRaw === nomeColab);
+                            if (!jaExiste) {
+                                let preAprov = linha.length > 3 ? extrairNumero(linha[3]) : 0;
+                                let realizado = linha.length > 5 ? extrairNumero(linha[5]) : 0;
+                                let metaOriginal = linha.length > 7 ? extrairNumero(linha[7]) : 0;
+                                let metaFinal = metaOriginal < 4 ? 4 : metaOriginal;
+                                let proj = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
+                                if (metaOriginal !== metaFinal) proj = (realizado / metaFinal) * 100;
+
+                                mapaColaboradoresGlobais[numFilialLimpo].push({ nomeRaw: nomeColab, nome: formatarNomeColab(linha[2]), preAprovado: preAprov, realizado: realizado, meta: metaFinal, proj: proj });
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+
+        const dadosSenior = json.nsl_senior || [];
+        let mapaCartao = mapearAbaIndicador(json.cartao || [], true);
+        let mapaSuper = mapearAbaIndicador(json.super || [], false);
+        let mapaSms = mapearAbaIndicador(json.sms || [], false);
+        let mapaCp = mapearAbaIndicador(json.cp || [], false);
+        let mapaPf = mapearAbaIndicador(json.pf || [], false);
+
+        let seniores = [];
+
+        for (let i = 1; i < dadosSenior.length; i++) {
+            let linha = dadosSenior[i];
+            if (!linha || linha.length === 0) continue;
+
+            let numFilialRaw = linha[0] ? linha[0].toString().trim() : '';
+            let numFilialLimpo = limparChave(numFilialRaw);
+            let nomeSeniorRaw = linha.length > 1 && linha[1] ? linha[1].toString().trim() : 'Sênior Não Informado';
+            if (nomeSeniorRaw.toUpperCase() === '#N/A' || nomeSeniorRaw === '') nomeSeniorRaw = 'Sênior Não Informado';
+
+            if (!numFilialLimpo || numFilialRaw.toLowerCase().includes('filial')) continue;
+
+            let detCartao = mapaCartao[numFilialLimpo] || { metaCalculada: 0, realizado: 0, proj: 0 };
+            let detSuper = mapaSuper[numFilialLimpo] || { metaCalculada: 0, realizado: 0, proj: 0 };
+            let detSms = mapaSms[numFilialLimpo] || { metaCalculada: 0, realizado: 0, proj: 0 };
+            let detCp = mapaCp[numFilialLimpo] || { metaCalculada: 0, realizado: 0, proj: 0 };
+            let detPf = mapaPf[numFilialLimpo] || { metaCalculada: 0, realizado: 0, proj: 0 };
+
+            let quadroInfo = mapaCidades[numFilialLimpo] || { cidade: '', foto: '' };
+            let cidadeFinal = quadroInfo.cidade;
+            if (!cidadeFinal || cidadeFinal.trim() === '') {
+                cidadeFinal = mapaCidadesVenda[numFilialLimpo] || '';
+                if (!cidadeFinal || cidadeFinal.trim() === '') {
+                    if (numFilialRaw.includes('-')) cidadeFinal = numFilialRaw.split('-')[1].trim();
+                    else cidadeFinal = 'NÃO INFORMADA';
+                }
+            }
+
+            let fppObj = mapaFpp[numFilialLimpo] || { carteiraMes: 0, metaRecebimento: 0, valorRecebido: 0, atingimento: 0, elegivel: false };
+            let atingimentoVenda1p = mapaVenda1p[numFilialLimpo] || 0;
+            let notaNps = mapaNps[numFilialLimpo] || 0;
+
+            let mCartao = getMultiplicador(detCartao.proj);
+            let mPf     = getMultiplicador(detPf.proj);
+            let mSuper  = getMultiplicador(detSuper.proj);
+            let mCp     = getMultiplicador(detCp.proj);
+            let mSms    = getMultiplicador(detSms.proj);
+            let mVenda  = getMultiplicador(atingimentoVenda1p);
+
+            let ptsNps = linha.length > 9 ? extrairNumero(linha[9]) : 0;
+            let ptsCartao = 25 * mCartao; let ptsPf = 20 * mPf; let ptsSuper = 15 * mSuper; let ptsCp = 10 * mCp; let ptsSms = 10 * mSms; let ptsVenda = 10 * mVenda;
+            let totalPontos = ptsCartao + ptsPf + ptsSuper + ptsCp + ptsSms + ptsVenda + ptsNps;
+
+            seniores.push({ numFilial: numFilialLimpo, senior: formatarNome(nomeSeniorRaw), seniorCompleto: nomeSeniorRaw, nomesQuadro: mapaNomesQuadro[numFilialLimpo] || [], cidade: cidadeFinal, foto: quadroInfo.foto, pontos: totalPontos, ptsNps: ptsNps, detFpp: fppObj, venda1p: atingimentoVenda1p, nps: notaNps, detCartao: detCartao, detSuper: detSuper, detSms: detSms, detCp: detCp, detPf: detPf });
+        }
+
+        seniores.sort((a, b) => b.pontos - a.pontos);
+        listaCompletaSeniores = seniores;
+
+        if (seniores.length > 0) preencherPodio(1, seniores[0], 'ffd700', 180);
+        if (seniores.length > 1) preencherPodio(2, seniores[1], 'C0C0C0', 160);
+        if (seniores.length > 2) preencherPodio(3, seniores[2], 'CD7F32', 150);
+
+        popularSelectFiliais(listaCompletaSeniores);
+        atualizarRelogioSincronizacao();
+        aplicarTravaSenior();
+
+        if (filialAtiva) {
+            if(document.getElementById('aba-metas').classList.contains('active')) abrirDetalhe(filialAtiva);
+            else if(document.getElementById('aba-colaborador').classList.contains('active')) abrirDetalheColab(filialAtiva);
+            else if(document.getElementById('aba-simulador').classList.contains('active')) abrirDetalheSimulador(filialAtiva);
+        }
+    }
+
+    // Nome exibido: a sênior logada vê o próprio nome; o Master vê todas as sêniores da filial
+    function nomeExibicao(dadosS) {
+        if (seniorLogadoNome && !isMasterLogado && dadosS.numFilial === seniorLogadoFilial) return seniorLogadoNome;
+        if (dadosS.nomesQuadro && dadosS.nomesQuadro.length > 1) return dadosS.nomesQuadro.join(' • ');
+        return dadosS.seniorCompleto.toUpperCase();
+    }
+
+    function preencherPodio(p, s, cor, tam) {
+        let n = s.senior;
+        const elNome = document.getElementById('nome-' + p);
+        if (s.nomesQuadro && s.nomesQuadro.length > 1) {
+            let primeiros = s.nomesQuadro.map(x => formatarNomeWhats(x.split(' ')[0]));
+            let txt = primeiros.length === 2 ? primeiros.join(' e ') : primeiros.slice(0, -1).join(', ') + ' e ' + primeiros[primeiros.length - 1];
+            elNome.classList.add('nome-multi');
+            elNome.innerHTML = txt;
+            n = primeiros.join(' ');
+        } else {
+            elNome.classList.remove('nome-multi');
+            elNome.innerHTML = `<span class="nome-desk">${n}</span><span class="nome-mob">${n.split(' ')[0]}</span>`;
+        }
+        document.getElementById('filial-' + p).innerText = `FL ${s.numFilial}${s.cidade ? ' - ' + s.cidade.toUpperCase() : ''}`;
+        document.getElementById('pontos-' + p).innerText = s.pontos.toFixed(1) + ' pts';
+        const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=${cor}&color=0b0f19&size=${tam}&bold=true`;
+        let imgUrl = s.foto;
+        if (!imgUrl || !imgUrl.startsWith('http')) imgUrl = fb;
+        const av = document.getElementById('avatar-' + p);
+        av.style.display = 'flex';
+        av.innerHTML = `<img src="${imgUrl}" crossorigin="anonymous" alt="${p}º Lugar" onerror="this.onerror=null;this.src='${fb}';">`;
+    }
+
+    function popularSelectFiliais(lista) {
+        let htmlRanking = ''; let htmlOpcoesMetas = ''; let htmlOpcoesSimul = ''; let htmlOpcoesColab = '';
+        let maxPts = lista.length > 0 && lista[0].pontos > 0 ? lista[0].pontos : 1;
+        for (let i = 3; i < lista.length; i++) {
+            let textoFilial = `FL ${lista[i].numFilial}`;
+            if (lista[i].cidade) textoFilial += ` - ${lista[i].cidade.toUpperCase()}`;
+            let pct = Math.max(0, Math.min(lista[i].pontos / maxPts * 100, 100));
+            htmlRanking += `
+            <div class="item-lista">
+                <span class="posicao-lista">${i + 1}º</span>
+                <div class="nome-wrap">
+                    <span class="nome-filial">${textoFilial}</span>
+                    <div class="barra"><i style="width:${pct.toFixed(1)}%"></i></div>
+                </div>
+                <span class="pontos-filial">${lista[i].pontos.toFixed(1)} pts</span>
+            </div>`;
+        }
+        document.getElementById('lista-selecao-ranking').innerHTML = htmlRanking;
+
+        let listaFiliais = [...lista].sort((a, b) => parseInt(a.numFilial) - parseInt(b.numFilial));
+        listaFiliais.forEach(s => {
+            let textoOpcao = `FL ${s.numFilial}`;
+            if(s.cidade) textoOpcao += ` - ${s.cidade.toUpperCase()}`;
+            let itemTemplate = `<div class="item-lista" onclick="abrirContexto('THIS_CONTEXT', '${s.numFilial}')"><div class="nome-wrap"><span class="nome-filial">${textoOpcao}</span></div><span class="acessar-lista">Acessar ➔</span></div>`;
+            htmlOpcoesMetas += itemTemplate.replace('THIS_CONTEXT', 'metas');
+            htmlOpcoesSimul += itemTemplate.replace('THIS_CONTEXT', 'simul');
+            htmlOpcoesColab += itemTemplate.replace('THIS_CONTEXT', 'colab');
+        });
+        document.getElementById('lista-selecao-metas').innerHTML = htmlOpcoesMetas;
+        document.getElementById('lista-selecao-simul').innerHTML = htmlOpcoesSimul;
+        document.getElementById('lista-selecao-colab').innerHTML = htmlOpcoesColab;
+
+        filtrarSelecao('ranking');
+    }
+
+    function abrirContexto(contexto, numFilial) {
+        if (contexto === 'metas') abrirDetalhe(numFilial);
+        if (contexto === 'simul') abrirDetalheSimulador(numFilial);
+        if (contexto === 'colab') abrirDetalheColab(numFilial);
+    }
+
+    function criarBlocoHTML(titulo, corHex, dados, textoMeta, customClass = '', isMonetario = false) {
+        let percValue = parseFloat(dados.proj) || 0; let prog = getProgressStyle(percValue); let tipoMon = isMonetario ? 'mon' : 'num';
+        return `<div class="bloco-indicador ${customClass}" style="border-color:${corHex}55;"><h4 class="titulo-bloco" style="color: ${corHex};">${titulo}</h4><div class="ind-grid-2"><div class="item-ind-max"><div class="label-ind-max">${textoMeta}</div><div class="val-ind-max animar-numero" data-valor="${dados.metaCalculada}" data-tipo="${tipoMon}" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">REALIZADO</div><div class="val-ind-max animar-numero" data-valor="${dados.realizado}" data-tipo="${tipoMon}" style="color: #ffffff;">0</div></div></div><div style="margin-top: 15px; text-align: center;"><div class="label-ind-max" style="margin-bottom: 5px;">PROJEÇÃO DE ATINGIMENTO</div><div class="progress-bg"><div class="progress-fill ${prog.classe}" data-target-width="${Math.min(percValue, 100)}%" style="width: 0%; background: ${prog.cor}; box-shadow: 0 0 10px ${prog.cor};"></div><div class="progress-text animar-numero" data-valor="${dados.proj}" data-tipo="perc" data-quasela="${prog.isQuase}" style="color: ${prog.isQuase ? 'white' : ''}">0%</div></div></div></div>`;
+    }
+
+    function criarBlocoVenda1P(titulo, corHex, percValue) {
+        let prog = getProgressStyle(percValue);
+        return `<div class="bloco-indicador" style="border-color:${corHex}55;"><h4 class="titulo-bloco" style="color: ${corHex};">${titulo}</h4><div style="margin-top: 35px; text-align: center;"><div class="label-ind-max" style="margin-bottom: 5px;">PROJEÇÃO DE ATINGIMENTO</div><div class="progress-bg"><div class="progress-fill ${prog.classe}" data-target-width="${Math.min(percValue, 100)}%" style="width: 0%; background: ${prog.cor}; box-shadow: 0 0 10px ${prog.cor};"></div><div class="progress-text animar-numero" data-valor="${percValue}" data-tipo="perc-fixed" data-quasela="${prog.isQuase}" style="color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);">0%</div></div></div></div>`;
+    }
+
+    function criarBlocoNPS(titulo, corHex, notaValue) {
+        let corNota = notaValue >= 90 ? '#34f5a0' : (notaValue >= 75 ? '#ffd24a' : '#ff5470');
+        return `<div class="bloco-indicador" style="border-color: ${corHex}55;"><h4 class="titulo-bloco" style="color: ${corHex};">${titulo}</h4><div style="text-align: center; padding: 10px;"><div class="label-ind-max" style="margin-bottom: 5px;">NOTA ATUAL DO ATENDIMENTO</div><div class="val-ind-max animar-numero" data-valor="${notaValue}" data-tipo="num" style="color: ${corNota}; font-size: 3em; font-family: var(--font-t); text-shadow: 0 0 15px ${corNota};">0</div></div></div>`;
+    }
+
+    function criarBlocoFPP(titulo, corHex, dados, customClass = '') {
+        let carteira = parseFloat(dados.carteiraMes) || 0; let metaReceb = parseFloat(dados.metaRecebimento) || 0; let valReceb = parseFloat(dados.valorRecebido) || 0; let ating = parseFloat(dados.atingimento) || 0; let prog = getProgressStyle(ating); let corPorcentagem = prog.cor; let barWidth = Math.min(ating, 100) + '%';
+        return `<div class="bloco-indicador ${customClass}" style="border-color:${corHex}55;"><h4 class="titulo-bloco" style="color: ${corHex};">${titulo}</h4><div class="ind-grid-3"><div class="item-ind-max"><div class="label-ind-max">CARTEIRA MÊS</div><div class="val-ind-max animar-numero" data-valor="${carteira}" data-tipo="mon" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">META RECEBIMENTO</div><div class="val-ind-max animar-numero" data-valor="${metaReceb}" data-tipo="mon" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">VALOR RECEBIDO</div><div class="val-ind-max animar-numero" data-valor="${valReceb}" data-tipo="mon" style="color: #ffffff;">0</div></div></div><div style="margin-top: 15px; text-align: center;"><div class="label-ind-max" style="margin-bottom: 5px;">PROJEÇÃO DE ATINGIMENTO</div><div class="progress-bg"><div class="progress-fill ${prog.classe}" data-target-width="${barWidth}" style="width: 0%; background: ${corPorcentagem}; box-shadow: 0 0 10px ${corPorcentagem};"></div><div class="progress-text animar-numero" data-valor="${ating}" data-tipo="perc" data-quasela="${prog.isQuase}" style="color: white;">0%</div></div></div></div>`;
+    }
+
+    function abrirDetalhe(numFilial) {
+        filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); if(!dadosS) return;
+        document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao').style.display = 'none'; document.getElementById('tela-detalhe').style.display = 'block';
+        let tituloDaCidade = dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA';
+        const sub = t => `<br><span style="font-size: 0.78em; font-weight: 600; font-family: var(--font); opacity:.85;">${t}</span>`;
+        document.getElementById('cardDetalheMax').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${dadosS.numFilial}</div><div class="detalhe-senior">👤 ${nomeExibicao(dadosS)}</div></div><div class="grid-blocos-indicadores">${criarBlocoHTML('💳 CARTÃO' + sub('(META 105%) 25 PTS'), '#22d3ee', dadosS.detCartao, 'META', '', false)}${criarBlocoHTML('📄 PARCELAMENTO DE FATURA' + sub('20 PTS'), '#34f5a0', dadosS.detPf, 'META', '', true)}${criarBlocoHTML('🛡️ SUPER PROTEGIDO' + sub('15 PTS'), '#ffd24a', dadosS.detSuper, 'META', '', false)}${criarBlocoHTML('💬 SMS' + sub('10 PTS'), '#ff9f1c', dadosS.detSms, 'META', '', false)}${criarBlocoHTML('💰 CRÉDITO PESSOAL' + sub('10 PTS'), '#ff5470', dadosS.detCp, 'META', '', true)}${criarBlocoVenda1P('📦 VENDA 1P' + sub('10 PTS'), '#f5a524', dadosS.venda1p)}${criarBlocoNPS('😊 NPS' + sub('10 PTS (ATENDIMENTO)'), '#a78bfa', dadosS.nps)}${criarBlocoFPP('⭐ FPP BÔNUS 20%' + sub('(Cobrança CDC)'), '#ff9f1c', dadosS.detFpp)}</div>`;
+        window.scrollTo({ top: 0 });
+        iniciarAnimacoes();
+    }
+
+    function fecharDetalhe() { filialAtiva = null; document.getElementById('tela-detalhe').style.display = 'none'; document.getElementById('topo-geral').style.display = 'block'; document.getElementById('tela-selecao').style.display = 'block'; document.querySelectorAll('.busca-ranking').forEach(input => { input.value = ''; }); filtrarSelecao('metas'); }
+
+    function compartilharEquipeWhatsApp(numFilial) {
+        const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); const listaColab = mapaColaboradoresGlobais[numFilial]; if (!dadosS || !listaColab) return;
+        let lojaBateuMeta = false; if (dadosS.detCartao.realizado >= dadosS.detCartao.metaCalculada) lojaBateuMeta = true;
+        const horaAtual = new Date().getHours(); let saudacao = "Bom dia"; if (horaAtual >= 12 && horaAtual < 18) saudacao = "Boa tarde"; else if (horaAtual >= 18) saudacao = "Boa noite";
+        let texto = `📊 *ACOMPANHAMENTO DE CARTÕES - FL ${numFilial}* 📊\n\n${saudacao} pessoal, segue acompanhamento da meta de cartões até o momento:\n\n`;
+        let contagemNomes = {}; listaColab.forEach(c => { let primeiro = c.nome.split(' ')[0]; contagemNomes[primeiro] = (contagemNomes[primeiro] || 0) + 1; });
+        let listaOrdenada = [...listaColab].sort((a, b) => b.realizado - a.realizado || b.proj - a.proj);
+        listaOrdenada.forEach(c => {
+            let atingiu = (c.realizado >= c.meta); let partesNome = c.nome.trim().split(' '); let primeiroNome = partesNome[0];
+            let nomeParaExibir = primeiroNome; if (contagemNomes[primeiroNome] > 1) nomeParaExibir = c.nome;
+            nomeParaExibir = formatarNomeWhats(nomeParaExibir);
+            texto += `👤 *${nomeParaExibir}*\n💳 Pré-aprovados: ${formatarValor(c.preAprovado, false)} | 🎯 Meta: ${formatarValor(c.meta, false)} | ✅ Feito: ${formatarValor(c.realizado, false)}\n`;
+            if (atingiu) texto += `🚀 *Bateu a meta!* Já garantiu premiação!\n\n`;
+            else { let falta = c.meta - c.realizado; if (falta === 1) texto += `⚠️ Falta 1 cartão para a meta!\n\n`; else texto += `⚠️ Faltam ${formatarValor(falta, false)} cartões para a meta!\n\n`; }
+        });
+        texto += `💡 *LEMBRETE DA PREMIAÇÃO:*\nBatendo sua meta individual = *R$ 6,00 por cartão*.\nLoja batendo a meta (105%) = *DOBRA para R$ 12,00* por cartão!\n\n`;
+        if (lojaBateuMeta) texto += `🟢 *PARABÉNSSSS! A loja BATEU a meta!* R$ 12,00 por cartão GARANTIDO para quem bater individual! 💪`;
+        else { let faltaLoja = dadosS.detCartao.metaCalculada - dadosS.detCartao.realizado; if(faltaLoja > 0) texto += `Faltam ${formatarValor(faltaLoja, false)} cartões para a loja bater a meta! Vamos acelerar juntos para dobrar o prêmio de todo mundo! 🔥`; else texto += `Vamos acelerar juntos para dobrar o prêmio de todo mundo e bater a meta da loja! 🔥`; }
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    function criarBlocoColaboradorHTML(colab, isGlobal = false) {
+        let percValue = parseFloat(colab.proj) || 0; let prog = getProgressStyle(percValue); let emoji = '🏃'; if (percValue >= 120) emoji = '🔥'; else if (percValue >= 100) emoji = '⭐';
+        let nomeTitle = isGlobal ? colab.nome : `${emoji} ${colab.nome}`;
+        return `<div class="bloco-indicador"><h4 class="titulo-bloco" style="color: #ffffff; margin-bottom: 15px; font-size: 1.05em; text-align: left; padding-left: 12px; border-left: 4px solid var(--cyan);">${nomeTitle}</h4><div class="ind-grid-3"><div class="item-ind-max"><div class="label-ind-max">PRÉ APROVADO</div><div class="val-ind-max animar-numero" data-valor="${colab.preAprovado}" data-tipo="num" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">META</div><div class="val-ind-max animar-numero" data-valor="${colab.meta}" data-tipo="num" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">REALIZADO</div><div class="val-ind-max animar-numero" data-valor="${colab.realizado}" data-tipo="num" style="color: #ffffff;">0</div></div></div><div style="margin-top: 15px; text-align: center;"><div class="label-ind-max" style="margin-bottom: 5px;">PROJEÇÃO DE ATINGIMENTO</div><div class="progress-bg"><div class="progress-fill ${prog.classe}" data-target-width="${Math.min(percValue, 100)}%" style="width: 0%; background: ${prog.cor}; box-shadow: 0 0 10px ${prog.cor};"></div><div class="progress-text animar-numero" data-valor="${colab.proj}" data-tipo="perc" data-quasela="${prog.isQuase}" style="color: ${prog.isQuase ? 'white' : ''}">0%</div></div></div></div>`;
+    }
+
+    function abrirTop10Global() {
+        document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao-colab').style.display = 'none'; document.getElementById('tela-detalhe-colab').style.display = 'block';
+        let todosColaboradores = [];
+        for (let filial in mapaColaboradoresGlobais) { let cidade = "N/I"; let dadosSenior = listaCompletaSeniores.find(s => s.numFilial === filial); if (dadosSenior && dadosSenior.cidade) cidade = dadosSenior.cidade; mapaColaboradoresGlobais[filial].forEach(colab => { todosColaboradores.push({ ...colab, filialInfo: `FL ${filial} - ${cidade}` }); }); }
+        todosColaboradores.sort((a, b) => b.proj - a.proj); let top10 = todosColaboradores.slice(0, 10);
+        let html = ''; top10.forEach((c, index) => { let pos = index + 1; let medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`; let colabFake = { ...c, nome: `${medalha} ${c.nome} <span style="font-size: 0.7em; color:var(--mut); margin-left: 10px; font-family: var(--font);">(${c.filialInfo})</span>` }; html += criarBlocoColaboradorHTML(colabFake, true); });
+        document.getElementById('cardDetalheColab').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">🏆 TOP 10 COLABORADORES CARTÃO LUIZA 🏆</h3><div class="detalhe-cidade">REGIONAL CAMPO BOM</div></div><div style="display: flex; flex-direction: column; gap: 18px;">${html}</div>`;
+        window.scrollTo({ top: 0 });
+        iniciarAnimacoes();
+    }
+
+    function abrirDetalheColab(numFilial) {
+        filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); let tituloDaCidade = dadosS && dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA';
+        document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao-colab').style.display = 'none'; document.getElementById('tela-detalhe-colab').style.display = 'block';
+        let htmlColaboradores = ''; let listaColab = mapaColaboradoresGlobais[numFilial];
+        if (listaColab && listaColab.length > 0) { listaColab.sort((a, b) => b.proj - a.proj); listaColab.forEach(colab => { htmlColaboradores += criarBlocoColaboradorHTML(colab); }); } else { htmlColaboradores = `<div style="text-align:center; padding: 40px; color: var(--mut);">Nenhum colaborador encontrado para esta filial no momento.</div>`; }
+        document.getElementById('cardDetalheColab').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${numFilial} - CARTÃO POR COLABORADOR</div>${dadosS ? `<div class="detalhe-senior">👤 ${nomeExibicao(dadosS)}</div>` : ''}<button class="btn-whatsapp-equipe" onclick="compartilharEquipeWhatsApp('${numFilial}')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.01 2.014c-5.465 0-9.895 4.43-9.895 9.895 0 1.745.454 3.447 1.316 4.954L2.014 22.01l5.282-1.385a9.854 9.854 0 0 0 4.714 1.196h.004c5.463 0 9.894-4.43 9.894-9.894 0-2.65-1.03-5.143-2.905-7.017A9.851 9.851 0 0 0 12.01 2.014zm5.42 14.28c-.227.639-1.316 1.233-1.815 1.306-.475.069-1.085.127-3.328-.801-2.73-1.13-4.48-3.92-4.615-4.1-.137-.181-1.103-1.467-1.103-2.798 0-1.332.693-1.986.942-2.26.248-.273.543-.341.724-.341.18 0 .362.003.52.01.183.008.428-.073.67.51.249.59.847 2.062.923 2.213.076.151.123.326.031.508-.09.182-.136.295-.272.453-.136.159-.286.342-.407.476-.137.152-.284.32-.122.598.163.28 .724 1.197 1.559 1.942 1.077.96 1.97 1.258 2.25 1.394.278.136.442.114.607-.068.164-.182.71-8.19.897-.109.188.272.76.012 1.168.212.408.2.338 1.487.338 1.487s.035.181-.19.82z"/></svg>Enviar no Grupo da Loja</button></div><div style="display: flex; flex-direction: column; gap: 18px;">${htmlColaboradores}</div>`;
+        window.scrollTo({ top: 0 });
+        iniciarAnimacoes();
+    }
+
+    function fecharDetalheColab() { filialAtiva = null; document.getElementById('tela-detalhe-colab').style.display = 'none'; document.getElementById('topo-geral').style.display = 'block'; document.getElementById('tela-selecao-colab').style.display = 'block'; document.querySelectorAll('.busca-ranking').forEach(input => { input.value = ''; }); filtrarSelecao('colab'); }
+
+    function abrirDetalheSimulador(numFilial) {
+        filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); if(!dadosS) return;
+        document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao-simul').style.display = 'none'; document.getElementById('tela-detalhe-simul').style.display = 'block';
+        let tituloDaCidade = dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA'; let nomeDoSenior = nomeExibicao(dadosS);
+        let pCartao = calcPerc(dadosS.detCartao.proj); let pPf = calcPerc(dadosS.detPf.proj); let pSuper = calcPerc(dadosS.detSuper.proj); let pCp = calcPerc(dadosS.detCp.proj); let pSms = calcPerc(dadosS.detSms.proj); let pVenda = calcPerc(dadosS.venda1p);
+        let mCartao = getMultiplicador(pCartao); let mPf = getMultiplicador(pPf); let mSuper = getMultiplicador(pSuper); let mCp = getMultiplicador(pCp); let mSms = getMultiplicador(pSms); let mVenda = getMultiplicador(pVenda);
+        let ptsCartao = 25 * mCartao; let ptsPf = 20 * mPf; let ptsSuper = 15 * mSuper; let ptsCp = 10 * mCp; let ptsSms = 10 * mSms; let ptsVenda = 10 * mVenda; let ptsNps = dadosS.ptsNps || 0;
+        let pontosSimulados = ptsCartao + ptsPf + ptsSuper + ptsCp + ptsSms + ptsVenda + ptsNps;
+        let gCartao = ptsCartao * 5; let gPf = ptsPf * 5; let gSuper = ptsSuper * 5; let gCp = ptsCp * 5; let gSms = ptsSms * 5; let gVenda = ptsVenda * 5; let gNps = ptsNps * 5;
+        let premioBase = gCartao + gPf + gSuper + gCp + gSms + gVenda + gNps;
+        let fppLogrado = dadosS.detFpp.elegivel; let valorBonus = fppLogrado ? (premioBase * 0.20) : 0; let premioFinal = premioBase + valorBonus;
+        let badgesPerda = []; let totalPerdido = 0;
+        function registrarPerda(nome, maxVal, ganhoAtual, icon) { let perda = maxVal - ganhoAtual; if (perda > 0) { badgesPerda.push(`<span class="badge-perda">${icon} ${nome} (R$ ${formatarValor(perda, false, true)})</span>`); totalPerdido += perda; } }
+        registrarPerda('Cartão', 156.25, gCartao, '💳'); registrarPerda('Parcelamento', 125.00, gPf, '📄'); registrarPerda('Super Protegido', 93.75, gSuper, '🛡️'); registrarPerda('SMS', 62.50, gSms, '💬'); registrarPerda('Crédito Pessoal', 62.50, gCp, '💰'); registrarPerda('Venda 1P', 62.50, gVenda, '📦'); registrarPerda('NPS', 62.50, gNps, '😊'); registrarPerda('Bônus FPP', 125.00, valorBonus, '⭐');
+
+        // Apenas visual: pontuação máxima possível (multiplicador 1,25x em todos os itens)
+        const PTS_MAXIMO = 125;
+        const fP = v => formatarValor(v, true) + '%';
+        const corFpp = fppLogrado ? '#34f5a0' : '#ff5470';
+
+        let alertaPontosHtml = '';
+        if (totalPerdido > 0) {
+            alertaPontosHtml = `<div class="bloco-indicador bloco-full" style="background: rgba(255,84,112,.05); border: 1px dashed #ff5470;"><h4 class="titulo-bloco" style="color: #ff5470;">⚠️ PREMIAÇÕES PROJETANDO NÃO ATINGIMENTO MÁXIMO</h4><p style="margin: 0 0 15px 0; font-size: 0.92em; color: var(--mut2); text-align:center;">Atenção! Você está deixando de ganhar os seguintes valores extras por não atingir a <b style="color:#fff;">projeção máxima do multiplicador (1,25x)</b>:</p><div style="margin-bottom: 20px; text-align: center;">${badgesPerda.join(' ')}</div><div style="display: flex; justify-content: center;"><div class="item-ind-max caixa-destaque-mobile" style="background: rgba(255,84,112,.1); border-color: #ff5470; width: 100%; max-width: 500px;"><div class="label-ind-max" style="color: #ff5470;">PROJEÇÃO À GANHAR, ACELERE PARA O MULTIPLICADOR MÁXIMO!</div><div class="val-ind-max" style="color: #ff5470; font-size: 2.2em;">R$ <span class="animar-numero" data-valor="${totalPerdido}" data-monetario="true">0,00</span></div></div></div></div>`;
+        } else {
+            alertaPontosHtml = `<div class="bloco-indicador bloco-full" style="background: rgba(52,245,160,.05); border: 1px dashed #34f5a0;"><h4 class="titulo-bloco" style="color: #34f5a0;">🏆 MÁXIMA PERFORMANCE!</h4><p style="margin: 0; font-size: 0.95em; color: #cbd5e1; text-align:center;">Você está garantindo 100% dos multiplicadores máximos (1,25x) e bônus!</p></div>`;
+        }
+
+        document.getElementById('cardDetalheSimulador').innerHTML = `
+        <div class="detalhe-header">
+            <h3 class="detalhe-nome">${nomeDoSenior}</h3>
+            <div class="detalhe-cidade">FL ${dadosS.numFilial} - ${tituloDaCidade}</div>
+        </div>
+        <div class="grid-blocos-indicadores">
+            <div class="bloco-indicador bloco-full" style="border-color:#22d3ee;">
+                <h4 class="titulo-bloco" style="color:#22d3ee;">PROJEÇÃO DO PRÊMIO BASE</h4>
+                <div class="nsl-hero">
+                    <div class="ring-wrap">
+                        <svg width="140" height="140" viewBox="0 0 120 120">
+                            <defs><linearGradient id="grSenior" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#ffd24a"/></linearGradient></defs>
+                            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+                            <circle class="ring-fg" cx="60" cy="60" r="54" data-pct="${Math.min(pontosSimulados / PTS_MAXIMO, 1).toFixed(4)}" style="stroke:url(#grSenior);stroke-dasharray:339.29;stroke-dashoffset:339.29;"/>
+                        </svg>
+                        <div class="ring-centro"><b><span class="animar-numero" data-valor="${pontosSimulados}" data-tipo="num">0</span></b><span>PONTOS</span></div>
+                    </div>
+                    <div class="nsl-kpis">
+                        <div class="item-ind-max" style="background:rgba(34,211,238,.1);">
+                            <div class="label-ind-max" style="color:#22d3ee;">PONTOS (MULTIPLICADOS)</div>
+                            <div class="val-ind-max" style="color:#fff;"><span class="animar-numero" data-valor="${pontosSimulados}" data-tipo="num">0</span></div>
+                        </div>
+                        <div class="item-ind-max" style="background:rgba(34,211,238,.1);">
+                            <div class="label-ind-max" style="color:#22d3ee;">VALOR BASE GERADO</div>
+                            <div class="val-ind-max" style="color:#fff;">R$ <span class="animar-numero" data-valor="${premioBase}" data-monetario="true">0,00</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comp-lista">
+                    ${linhaComponente('Cartão', ptsCartao, 31.25, 'Ating. ' + fP(pCartao))}
+                    ${linhaComponente('Parcelamento', ptsPf, 25, 'Ating. ' + fP(pPf))}
+                    ${linhaComponente('Super Protegido', ptsSuper, 18.75, 'Ating. ' + fP(pSuper))}
+                    ${linhaComponente('SMS', ptsSms, 12.5, 'Ating. ' + fP(pSms))}
+                    ${linhaComponente('Crédito Pessoal', ptsCp, 12.5, 'Ating. ' + fP(pCp))}
+                    ${linhaComponente('Venda 1P', ptsVenda, 12.5, 'Ating. ' + fP(pVenda))}
+                    ${linhaComponente('NPS', ptsNps, 12.5, 'Nota ' + formatarValor(dadosS.nps, false))}
+                </div>
+            </div>
+
+            ${criarBlocoFPP('⭐ GATILHO FPP BÔNUS 20% <br><span style="font-size: 0.78em; font-weight: 600; font-family: var(--font); opacity:.85;">(Cobrança CDC)</span>', '#ff9f1c', dadosS.detFpp, 'bloco-full')}
+
+            <div class="bloco-indicador" style="border-color:${corFpp};">
+                <h4 class="titulo-bloco" style="color:${corFpp};">VALOR DO BÔNUS (R$)</h4>
+                <div style="text-align:center;margin-bottom:15px;">
+                    <span class="label-ind-max">GATILHO FPP 100%</span>
+                    <div style="color:${corFpp};font-size:1.2em;font-weight:800;margin-top:5px;">${fppLogrado ? '✅ OK' : '❌ NÃO ATINGIDO'}</div>
+                </div>
+                <div class="item-ind-max caixa-destaque-mobile">
+                    <div class="label-ind-max">ACRÉSCIMO DE 20% FPP</div>
+                    <div class="val-ind-max" style="color:${corFpp};font-size:1.5em;">+ R$ <span class="animar-numero" data-valor="${valorBonus}" data-monetario="true">0,00</span></div>
+                </div>
+            </div>
+
+            <div class="bloco-indicador" style="background:linear-gradient(135deg,rgba(52,245,160,.15) 0%,rgba(8,13,26,.92) 100%);border:2px solid #34f5a0;display:flex;flex-direction:column;justify-content:center;">
+                <h4 class="titulo-bloco" style="color:#34f5a0;">PRÊMIO TOTAL PROJETADO</h4>
+                <div class="item-ind-max caixa-destaque-mobile" style="background:transparent;border:none;padding:10px;">
+                    <div class="val-ind-max premio-gigante-verde">R$ <span class="animar-numero" data-valor="${premioFinal}" data-monetario="true">0,00</span></div>
+                </div>
+            </div>
+
+            ${alertaPontosHtml}
+        </div>`;
+        window.scrollTo({ top: 0 });
+        iniciarAnimacoes();
+        animarAneisEBarras(document.getElementById('cardDetalheSimulador'));
+    }
+
+    function fecharDetalheSimulador() { filialAtiva = null; document.getElementById('tela-detalhe-simul').style.display = 'none'; document.getElementById('topo-geral').style.display = 'block'; document.getElementById('tela-selecao-simul').style.display = 'block'; document.querySelectorAll('.busca-ranking').forEach(input => { input.value = ''; }); filtrarSelecao('simul'); }
+
+    async function carregarDados(tentativas = 3) {
+        const memoriaLocal = localStorage.getItem('dadosSenior_Memoria_v98');
+        if (memoriaLocal) {
+            try {
+                renderizarTela(JSON.parse(memoriaLocal));
+                document.getElementById('texto-carregando').innerText = 'Sincronizando...';
+            } catch (e) {
+                localStorage.removeItem('dadosSenior_Memoria_v98');
+            }
+        }
+
+        try {
+            const urlComCache = URL_WEB_APP + "?t=" + new Date().getTime();
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+            const resposta = await fetch(urlComCache, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!resposta.ok) throw new Error("O Google recusou a conexão.");
+
+            const textoPlano = await resposta.text();
+            let json;
+            try {
+                json = JSON.parse(textoPlano);
+            } catch(e) {
+                throw new Error("O Google enviou dados corrompidos. Verifique se a URL do Web App está correta.");
+            }
+
+            if (json.erro) {
+                throw new Error("Erro no Script: " + json.erro);
+            }
+
+            if (!json.nsl_senior || json.nsl_senior.length === 0) {
+                throw new Error("Aba Sênior não encontrada ou vazia!");
+            }
+
+            localStorage.setItem('dadosSenior_Memoria_v98', JSON.stringify(json));
+            renderizarTela(json);
+            document.getElementById('texto-carregando').innerText = '';
+            document.getElementById('aviso-erro').style.display = 'none';
+            document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+
+        } catch (erro) {
+            if (tentativas > 1) {
+                if (!memoriaLocal) {
+                    document.getElementById('texto-carregando').innerHTML = `Sincronizando... (${4 - tentativas}/3) 🔄`;
+                }
+                setTimeout(() => carregarDados(tentativas - 1), 3000);
+            } else {
+                if (memoriaLocal) {
+                    document.getElementById('rodape-sync').innerHTML = `🟡 Exibindo dados da memória (Offline)`;
+                    document.getElementById('texto-carregando').innerText = '';
+                    document.getElementById('aviso-erro').style.display = 'none';
+                } else {
+                    const elementoAviso = document.getElementById('aviso-erro');
+                    elementoAviso.style.display = 'block';
+                    elementoAviso.innerHTML = '⚠️ Erro de Conexão: ' + erro.message;
+                    document.getElementById('texto-carregando').innerText = '';
+                    document.getElementById('lista-selecao-ranking').innerHTML = '';
+                }
+            }
+        }
+    }
+
+    carregarDados();
+
+    function toggleShareMenu() { document.getElementById('shareMenu').classList.toggle('show'); }
+
+    async function gerarImagem(formato) {
+        const containerShare = document.querySelector('.share-container');
+        document.getElementById('shareMenu').classList.remove('show');
+        containerShare.style.display = 'none';
+        window.scrollTo(0, 0);
+        showToast('Gerando imagem...', 'info', 2500);
+
+        try {
+            const canvasOriginal = await html2canvas(document.body, {
+                backgroundColor: '#060913',
+                scale: 2,
+                useCORS: true,
+                onclone: (d) => {
+                    const b = d.getElementById('share-banner');
+                    if (b) b.style.display = 'block';
+                    d.body.style.backgroundImage = 'none';
+                    d.body.style.paddingBottom = '20px';
+                },
+                ignoreElements: (element) => element.classList.contains('share-container') || element.classList.contains('tab-container') || element.classList.contains('bg-efeito-cores') || element.id === 'bg-clouds' || element.classList.contains('fumaca') || element.id === 'fumaca-palco' || element.id === 'btn-som' || element.id === 'intro-black' || element.classList.contains('btn-whatsapp-equipe') || element.classList.contains('sync-container') || element.id === 'toast-box' || element.id === 'lightbox' || element.id === 'aviso-erro' || element.id === 'texto-carregando' || element.id === 'login-overlay'
+            });
+
+            containerShare.style.display = 'flex';
+            const finalCanvas = document.createElement('canvas');
+            const ctx = finalCanvas.getContext('2d');
+            const targetW = 1080; const targetH = formato === 'feed' ? 1080 : 1920;
+            finalCanvas.width = targetW; finalCanvas.height = targetH;
+
+            ctx.fillStyle = '#060913'; ctx.fillRect(0, 0, targetW, targetH);
+            const gl = ctx.createRadialGradient(targetW / 2, 0, 50, targetW / 2, 0, targetH * 0.7);
+            gl.addColorStop(0, 'rgba(155,0,232,0.22)');
+            gl.addColorStop(1, 'rgba(155,0,232,0)');
+            ctx.fillStyle = gl; ctx.fillRect(0, 0, targetW, targetH);
+
+            const margem = formato === 'feed' ? 100 : 150;
+            const scale = Math.min((targetW - margem) / canvasOriginal.width, (targetH - margem) / canvasOriginal.height);
+            const drawW = canvasOriginal.width * scale; const drawH = canvasOriginal.height * scale;
+            ctx.drawImage(canvasOriginal, (targetW - drawW) / 2, (targetH - drawH) / 2, drawW, drawH);
+
+            finalCanvas.toBlob(async function(blob) {
+                const arquivo = new File([blob], `painel-senior-${formato}.png`, { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+                    try { await navigator.share({ files: [arquivo], title: 'Projeção Sênior' }); } catch (err) {}
+                } else {
+                    const link = document.createElement('a');
+                    link.download = `painel-senior-${formato}.png`;
+                    link.href = finalCanvas.toDataURL('image/png');
+                    link.click();
+                }
+            }, 'image/png');
+        } catch (erro) {
+            containerShare.style.display = 'flex';
+            showToast("Ocorreu um erro ao gerar a imagem.", 'erro');
+        }
+    }
+</script>
+</body>
+</html>
