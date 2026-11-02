@@ -569,6 +569,40 @@
             .tab-btn.tab-black.active { background: transparent !important; box-shadow: none !important; color: #ff8c00 !important; }
             .tab-btn.tab-black.active svg { stroke: #ff8c00; }
         }
+        /* ===== METAS: alternância "Minha filial" x "Ranking por indicador" ===== */
+        .metas-toggle { display: inline-flex; gap: 6px; padding: 5px; border-radius: 40px; background: rgba(17,26,48,.85); border: 1px solid var(--line); margin: 0 auto 14px; }
+        .metas-toggle button { border: 0; cursor: pointer; padding: 9px 18px; border-radius: 40px; background: transparent; color: var(--mut); font: 700 .9em var(--font); letter-spacing: .3px; transition: background .2s, color .2s; }
+        .metas-toggle button.ativo { background: linear-gradient(135deg, #ff0055 0%, #9b00e8 55%, #00d2ff 100%); color: #fff; box-shadow: 0 6px 22px rgba(155,0,232,.35); }
+        #metas-view-ranking { display: none; text-align: left; }
+        .rk-wrap { width: 100%; overflow-x: auto; border-radius: 16px; border: 1px solid var(--line); background: rgba(10,16,32,.82); -webkit-overflow-scrolling: touch; }
+        .rk-tab { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 980px; font-family: var(--font); }
+        .rk-tab th { position: sticky; top: 0; background: #0d1530; color: var(--mut); font-size: .72em; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; padding: 12px 8px; text-align: center; cursor: pointer; user-select: none; white-space: nowrap; border-bottom: 1px solid var(--line); }
+        .rk-tab th small { display: block; color: var(--cyan); font-size: .92em; margin-top: 3px; letter-spacing: .4px; }
+        .rk-tab th.ordenado { color: var(--gold); }
+        .rk-tab th.ordenado::after { content: ' ▼'; color: var(--gold); }
+        .rk-tab th.ordenado.asc::after { content: ' ▲'; }
+        .rk-tab td { padding: 11px 8px; text-align: center; font-weight: 800; font-size: .95em; border-bottom: 1px solid rgba(130,160,220,.08); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .rk-tab th:first-child, .rk-tab td:first-child { position: sticky; left: 0; z-index: 2; text-align: left; background: #0f1834; border-right: 1px solid var(--line); min-width: 230px; }
+        .rk-tab th:first-child { z-index: 3; background: #0d1530; }
+        .rk-tab td:first-child { color: var(--txt); font-weight: 800; }
+        .rk-tab td:first-child .pos { display: inline-block; min-width: 30px; color: var(--gold); }
+        .rk-tab tr.top3 td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+        .rk-tab tr.minha td { background: rgba(34,211,238,.10); }
+        .rk-tab tr.minha td:first-child { background: #12304a; }
+        .rk-tab td.pts { color: var(--gold); }
+        .rk-ok { color: var(--green); } .rk-quase { color: var(--orange); } .rk-ruim { color: var(--red); }
+        .rk-legenda { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; color: var(--mut); font-size: .78em; margin: 10px 0 2px; }
+        .rk-legenda b { font-weight: 800; }
+        .rk-dica { color: var(--mut); font-size: .8em; text-align: center; margin: 0 0 10px; }
+        .rk-oculto { padding: 28px 14px; }
+        @media (max-width: 700px) {
+            .metas-toggle button { padding: 8px 12px; font-size: .82em; }
+            .rk-tab th:first-child, .rk-tab td:first-child { min-width: 135px; max-width: 135px; white-space: normal; line-height: 1.25; }
+            .rk-tab td:first-child .rk-cid { display: block; padding-left: 30px; font-size: .74em; font-weight: 700; color: var(--mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .rk-tab td:first-child .rk-sep { display: none; }
+            .rk-dica { font-size: .74em; }
+            .rk-tab td { font-size: .85em; padding: 10px 6px; }
+        }
     </style>
 </head>
 <body>
@@ -760,12 +794,24 @@
 <div id="aba-metas" class="tab-content">
     <div class="container-metas">
         <div id="tela-selecao" class="tela-selecao">
-            <div class="placeholder-compacto">
-                <strong>🎯 VISUALIZAR METAS</strong> — selecione a sua filial para o detalhamento de metas.
+            <div class="metas-toggle" data-html2canvas-ignore="true">
+                <button id="btn-metas-filial" class="ativo" onclick="alternarVisaoMetas('filial')">🏪 Minha filial</button>
+                <button id="btn-metas-ranking" onclick="alternarVisaoMetas('ranking')">📊 Ranking por indicador</button>
             </div>
-            <div class="secao-lista-wrapper">
-                <input type="text" id="busca-metas" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('metas')">
-                <div class="secao-lista" id="lista-selecao-metas"></div>
+            <div id="metas-view-filial">
+                <div class="placeholder-compacto">
+                    <strong>🎯 VISUALIZAR METAS</strong> — selecione a sua filial para o detalhamento de metas.
+                </div>
+                <div class="secao-lista-wrapper">
+                    <input type="text" id="busca-metas" class="busca-ranking" placeholder="🔍 Pesquisar filial ou cidade..." onkeyup="filtrarSelecao('metas')">
+                    <div class="secao-lista" id="lista-selecao-metas"></div>
+                </div>
+            </div>
+            <div id="metas-view-ranking">
+                <p class="rk-dica">Clique no nome de um indicador para ordenar as lojas por ele.</p>
+                <input type="text" id="busca-rk" class="busca-ranking" placeholder="🔍 Filtrar filial ou cidade..." onkeyup="renderRankingIndicadores()" style="margin-bottom:10px;">
+                <div class="rk-wrap" id="rk-wrap"></div>
+                <div class="rk-legenda"><span><b class="rk-ok">■</b> 100% ou mais</span><span><b class="rk-quase">■</b> 90% a 99,9%</span><span><b class="rk-ruim">■</b> abaixo de 90%</span></div>
             </div>
         </div>
 
@@ -1527,6 +1573,7 @@ document.addEventListener('keydown', e => {
             seniorLogadoNome = null;
             const destinoMaster = abaPendente;   // guarda a aba antes do fecharLogin() limpar
             fecharLogin();
+            if (visaoMetas === 'ranking') renderRankingIndicadores();
 
             document.getElementById('btn-logout').style.display = 'flex';
 
@@ -1555,6 +1602,8 @@ document.addEventListener('keydown', e => {
             document.getElementById('btn-logout').style.display = 'flex';
             const destino = abaPendente;   // guarda a aba antes do fecharLogin() limpar
             fecharLogin();
+            filtrarSelecao('metas'); filtrarSelecao('simul'); filtrarSelecao('colab');
+            if (visaoMetas === 'ranking') renderRankingIndicadores();
 
             if(destino) {
                 executarTrocaAba(destino);
@@ -1839,6 +1888,14 @@ document.addEventListener('keydown', e => {
         else return num.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
     }
 
+    // Corrige arredondamento da fonte: 99,99% vira 100% e quem fez a meta (ex.: 4 de 4) nunca fica abaixo de 100%
+    function ajustarPerc(perc, realizado, meta) {
+        let p = Number(perc) || 0;
+        if (p >= 99.95 && p < 100) p = 100;
+        if (meta > 0 && realizado >= meta && p < 100) p = 100;
+        return p;
+    }
+
     function mapearAbaIndicador(dadosAba, calcular105 = false) {
         let mapa = {};
         if (dadosAba && dadosAba.length > 0) {
@@ -1849,7 +1906,11 @@ document.addEventListener('keydown', e => {
                 if(numF) {
                     let metaOriginal = extrairNumero(linha[1]);
                     let metaFinal = calcular105 ? Math.ceil(metaOriginal * 1.05) : metaOriginal;
-                    mapa[numF] = { metaCalculada: metaFinal, realizado: extrairNumero(linha[2]), proj: extrairNumero(linha[3], true) };
+                    let realizado = extrairNumero(linha[2]);
+                    // compara com a meta como aparece na tela (4, não 3,9996)
+                    let metaComparar = Math.round(metaOriginal * 100) / 100;
+                    if (Math.abs(metaComparar - Math.round(metaComparar)) < 0.01) metaComparar = Math.round(metaComparar);
+                    mapa[numF] = { metaCalculada: metaFinal, realizado: realizado, proj: ajustarPerc(extrairNumero(linha[3], true), realizado, metaComparar) };
                 }
             }
         }
@@ -1914,6 +1975,7 @@ document.addEventListener('keydown', e => {
                 let numF = limparChave(linha[0]);
                 if(numF) {
                     let atingimento = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
+                    atingimento = ajustarPerc(atingimento, linha.length > 4 ? extrairNumero(linha[4]) : 0, linha.length > 3 ? extrairNumero(linha[3]) : 0);
                     mapaFpp[numF] = { carteiraMes: linha.length > 1 ? extrairNumero(linha[1]) : 0, metaRecebimento: linha.length > 3 ? extrairNumero(linha[3]) : 0, valorRecebido: linha.length > 4 ? extrairNumero(linha[4]) : 0, atingimento: atingimento >= 100 ? 100 : atingimento, elegivel: (atingimento >= 100) };
                 }
             }
@@ -1928,7 +1990,7 @@ document.addEventListener('keydown', e => {
                 let numF = limparChave(linha[0]);
                 if(numF) {
                     if (linha.length > 1 && linha[1]) mapaCidadesVenda[numF] = linha[1].toString().trim();
-                    if (linha.length > 4) mapaVenda1p[numF] = extrairNumero(linha[4], true);
+                    if (linha.length > 4) mapaVenda1p[numF] = ajustarPerc(extrairNumero(linha[4], true), linha.length > 3 ? extrairNumero(linha[3]) : 0, linha.length > 2 ? extrairNumero(linha[2]) : 0);
                 }
             }
         }
@@ -1976,6 +2038,7 @@ document.addEventListener('keydown', e => {
                                 let metaFinal = metaOriginal < 4 ? 4 : metaOriginal;
                                 let proj = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
                                 if (metaOriginal !== metaFinal) proj = (realizado / metaFinal) * 100;
+                                proj = ajustarPerc(proj, realizado, metaFinal);
 
                                 mapaColaboradoresGlobais[numFilialLimpo].push({ nomeRaw: nomeColab, nome: formatarNomeColab(linha[2]), preAprovado: preAprov, realizado: realizado, meta: metaFinal, proj: proj });
                             }
@@ -2049,6 +2112,7 @@ document.addEventListener('keydown', e => {
         popularSelectFiliais(listaCompletaSeniores);
         atualizarRelogioSincronizacao();
         aplicarTravaSenior();
+        if (visaoMetas === 'ranking') renderRankingIndicadores();
 
         if (filialAtiva) {
             if(document.getElementById('aba-metas').classList.contains('active')) abrirDetalhe(filialAtiva);
@@ -2120,6 +2184,91 @@ document.addEventListener('keydown', e => {
         document.getElementById('lista-selecao-colab').innerHTML = htmlOpcoesColab;
 
         filtrarSelecao('ranking');
+    }
+
+    // ==========================================
+    // METAS — RANKING POR INDICADOR (todas as lojas lado a lado)
+    // ==========================================
+    let visaoMetas = 'filial';
+    let rkOrdem = 'pontos';
+
+    function alternarVisaoMetas(v) {
+        visaoMetas = v;
+        document.getElementById('btn-metas-filial').classList.toggle('ativo', v === 'filial');
+        document.getElementById('btn-metas-ranking').classList.toggle('ativo', v === 'ranking');
+        document.getElementById('metas-view-filial').style.display = v === 'filial' ? 'block' : 'none';
+        document.getElementById('metas-view-ranking').style.display = v === 'ranking' ? 'block' : 'none';
+        if (v === 'ranking') renderRankingIndicadores();
+    }
+
+    let rkDir = 'desc';
+    // 1º clique: maior → menor | 2º clique: menor → maior | 3º clique: volta ao padrão (pontos)
+    function ordenarRanking(chave) {
+        if (chave !== rkOrdem) { rkOrdem = chave; rkDir = 'desc'; }
+        else if (rkDir === 'desc') { rkDir = 'asc'; }
+        else { rkOrdem = 'pontos'; rkDir = 'desc'; }
+        renderRankingIndicadores();
+    }
+
+    const RK_COLUNAS = [
+        { k: 'cartao',  t: 'CARTÃO',        s: '25 PTS',           v: s => s.detCartao.proj,   tipo: 'perc' },
+        { k: 'pf',      t: 'PARC. FATURA',  s: '20 PTS',           v: s => s.detPf.proj,       tipo: 'perc' },
+        { k: 'super',   t: 'SUPER PROT.',   s: '15 PTS',           v: s => s.detSuper.proj,    tipo: 'perc' },
+        { k: 'sms',     t: 'SMS',           s: '10 PTS',           v: s => s.detSms.proj,      tipo: 'perc' },
+        { k: 'cp',      t: 'CRÉD. PESSOAL', s: '10 PTS',           v: s => s.detCp.proj,       tipo: 'perc' },
+        { k: 'venda',   t: 'VENDA 1P',      s: '10 PTS',           v: s => s.venda1p,          tipo: 'perc' },
+        { k: 'nps',     t: 'NPS',           s: '10 PTS',           v: s => s.nps,              tipo: 'nps' },
+        { k: 'fpp',     t: 'FPP CDC',       s: 'BÔNUS 20%',        v: s => s.detFpp.atingimento, tipo: 'fpp' },
+        { k: 'pontos',  t: 'PONTOS',        s: 'NSL',              v: s => s.pontos,           tipo: 'pts' }
+    ];
+
+    function rkCelula(col, s) {
+        const val = Number(col.v(s)) || 0;
+        if (col.tipo === 'pts') return `<td class="pts">${val.toFixed(1).replace('.', ',')}</td>`;
+        if (col.tipo === 'nps') {
+            const cls = s.ptsNps > 0 ? 'rk-ok' : 'rk-ruim';
+            return `<td class="${cls}">${val ? val.toFixed(1).replace('.', ',') : '-'}</td>`;
+        }
+        if (col.tipo === 'fpp') {
+            return s.detFpp.elegivel ? `<td class="rk-ok">100,0%</td>` : `<td class="rk-ruim">${val.toFixed(1).replace('.', ',')}%</td>`;
+        }
+        const cls = val >= 100 ? 'rk-ok' : (val >= 90 ? 'rk-quase' : 'rk-ruim');
+        return `<td class="${cls}">${val.toFixed(1).replace('.', ',')}%</td>`;
+    }
+
+    function renderRankingIndicadores() {
+        const wrap = document.getElementById('rk-wrap');
+        if (!wrap) return;
+        if (typeof rankingOculto === 'function' && rankingOculto()) {
+            wrap.innerHTML = `<div class="rk-oculto">${htmlTeaserBlack()}</div>`;
+            return;
+        }
+        const lista = listaCompletaSeniores || [];
+        if (!lista.length) { wrap.innerHTML = '<div class="rk-oculto" style="text-align:center;color:var(--mut);">Carregando dados...</div>'; return; }
+
+        // posição oficial = ordem por pontos (a mesma do Ranking)
+        const posOficial = {};
+        [...lista].sort((a, b) => b.pontos - a.pontos).forEach((s, i) => { posOficial[s.numFilial] = i + 1; });
+
+        const col = RK_COLUNAS.find(c => c.k === rkOrdem) || RK_COLUNAS[0];
+        const sinal = rkDir === 'asc' ? -1 : 1;
+        const ordenada = [...lista].sort((a, b) => sinal * ((Number(col.v(b)) || 0) - (Number(col.v(a)) || 0)) || b.pontos - a.pontos);
+
+        const filtro = (document.getElementById('busca-rk').value || '').toLowerCase();
+        let linhas = '';
+        ordenada.forEach((s, i) => {
+            const nome = `FL ${s.numFilial}${s.cidade ? ' - ' + s.cidade.toUpperCase() : ''}`;
+            if (filtro && !nome.toLowerCase().includes(filtro)) return;
+            const pos = rkDir === 'asc' ? ordenada.length - i : i + 1;
+            const minha = seniorLogadoFilial && !isMasterLogado && s.numFilial === seniorLogadoFilial;
+            const cls = [(rkDir === 'desc' && pos <= 3) ? 'top3' : '', minha ? 'minha' : ''].join(' ').trim();
+            const titulo = rkOrdem === 'pontos' ? '' : ` title="${posOficial[s.numFilial]}º no ranking geral"`;
+            const cidadeRk = s.cidade ? `<span class="rk-cid"><span class="rk-sep"> - </span>${s.cidade.toUpperCase()}</span>` : '';
+            linhas += `<tr class="${cls}"><td${titulo}><span class="pos">${pos}º</span>FL ${s.numFilial}${cidadeRk}</td>${RK_COLUNAS.map(c => rkCelula(c, s)).join('')}</tr>`;
+        });
+
+        const cab = RK_COLUNAS.map(c => `<th class="${c.k === rkOrdem ? 'ordenado' + (rkDir === 'asc' ? ' asc' : '') : ''}" onclick="ordenarRanking('${c.k}')">${c.t}<small>${c.s}</small></th>`).join('');
+        wrap.innerHTML = `<table class="rk-tab"><thead><tr><th onclick="rkOrdem='pontos';rkDir='desc';renderRankingIndicadores()">FILIAL <small>/ CIDADE</small></th>${cab}</tr></thead><tbody>${linhas || '<tr><td colspan="10" style="text-align:center;color:var(--mut);">Nenhuma filial encontrada.</td></tr>'}</tbody></table>`;
     }
 
     function abrirContexto(contexto, numFilial) {
