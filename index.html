@@ -550,6 +550,12 @@
         .pz-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
         .pz-card { padding: 16px 14px; }
         .pz-ouro { --c: #ffd24a; }
+        /* escada do cartão sempre dentro do card */
+        .pz-escada { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+        .pz-escada div { min-width: 0; padding: 8px 2px; }
+        .pz-escada b { font-size: clamp(1.2em, 1.9vw, 1.7em); }
+        .pz-escada small, .pz-escada span { font-size: clamp(.52em, .75vw, .62em); }
+        .pz-escada i { font-size: clamp(.6em, .82vw, .78em); padding: 3px 4px; max-width: 100%; overflow: hidden; text-overflow: clip; }
         .grid-potencial .item-potencial.destaque { flex: 1.4; transform: none; padding: 10px 10px; }
         .grid-potencial .item-potencial.destaque .valor { font-size: clamp(1.15em, 1.55vw, 1.7em); }
         .pz-valor { gap: 8px; padding: 10px 12px; }
@@ -964,9 +970,9 @@
             </div>
             <!-- PULA PRA 15 CDC -->
             <div class="pz-card pz-azul">
-                <div class="pz-head"><span class="pz-ico">🚀</span><div><h4>PULA PRA 15 CDC <span class="pz-tag">NOVO</span></h4><small>Meta alvo de venda CDC da loja</small></div></div>
+                <div class="pz-head"><span class="pz-ico">🚀</span><div><h4>PULA PRA 15 CDC <span class="pz-tag">NOVO</span></h4><small>Meta Desafio de venda CDC da loja</small></div></div>
                 <div class="pz-itens">
-                    <div><b>VENDA CDC DA LOJA</b><span>100% de atingimento</span></div>
+                    <div><b>META DESAFIO CDC DA LOJA</b><span>100% de atingimento</span></div>
                     <div><b>GATILHO FPP</b><span>entregar o FPP da loja (100%)</span></div>
                 </div>
                 <div class="pz-valor"><small>100% DA META</small><b>R$ 250</b></div>
@@ -2689,9 +2695,9 @@ document.addEventListener('keydown', e => {
    'desligado'      = só o ranking real
    ========================================================= */
 const DESTAQUE = {
-    modo: 'apresentacao',
+    modo: 'rotativo',
     segundosDestaque: 8,          // quanto tempo a foto fica na tela
-    intervaloSegundos: 20,        // modo 'rotativo': tempo do ranking entre uma foto e outra
+    intervaloSegundos: 25,        // modo 'rotativo': tempo do ranking entre uma foto e outra
     intervaloSegundosPodio: 20,   // modo 'rotativo-podio': tempo do pódio entre uma foto e outra
     titulo: '',                   // vazio = automático: "SÊNIOR DESTAQUE - <mês anterior> <ano>" (muda sozinho no dia 3)
     nome: 'ALESSANDRA',
