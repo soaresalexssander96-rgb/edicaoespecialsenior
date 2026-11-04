@@ -543,7 +543,25 @@
         .pz-escada b { font-family: var(--font-t); font-size: 1.7em; line-height: 1; color: #ffe100; }
         .pz-escada span { font-size: .62em; font-weight: 700; color: var(--mut2); }
         .pz-escada i { font-style: normal; margin-top: 6px; padding: 3px 6px; border-radius: 8px; background: #4dff7a; color: #0a0f1c; font-weight: 900; font-size: .78em; white-space: nowrap; }
-        .grid-potencial .item-potencial { min-width: 120px; }
+        .grid-potencial .item-potencial { min-width: 0; padding: 10px 8px; }
+        .grid-potencial { gap: 8px; }
+        .grid-potencial .plus, .grid-potencial .equals { font-size: 1.4em; }
+        .grid-potencial .item-potencial .valor { font-size: clamp(1em, 1.35vw, 1.4em); white-space: nowrap; }
+        .pz-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .pz-card { padding: 16px 14px; }
+        .pz-ouro { --c: #ffd24a; }
+        .grid-potencial .item-potencial.destaque { flex: 1.4; transform: none; padding: 10px 10px; }
+        .grid-potencial .item-potencial.destaque .valor { font-size: clamp(1.15em, 1.55vw, 1.7em); }
+        .pz-valor { gap: 8px; padding: 10px 12px; }
+        .pz-valor small { line-height: 1.2; }
+        .pz-valor b { font-size: clamp(1.6em, 2.2vw, 2.6em); white-space: nowrap; }
+        @media (max-width:850px) { .grid-potencial .item-potencial.destaque .valor { font-size: 1.8em; } .grid-potencial .item-potencial .valor { font-size: 1.4em; } }
+        .pz-medalhas { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+        .pz-medalhas div { display: grid; grid-template-columns: 34px 1fr auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: rgba(255,210,74,.08); border: 1px solid rgba(255,210,74,.45); }
+        .pz-medalhas .pz-med { grid-row: 1 / span 2; font-size: 1.5em; }
+        .pz-medalhas b { font-family: var(--font-t); font-size: 1.25em; color: #fff; line-height: 1; }
+        .pz-medalhas small { grid-column: 2; font-size: .62em; font-weight: 800; color: var(--mut2); letter-spacing: 1px; }
+        .pz-medalhas i { grid-column: 3; grid-row: 1 / span 2; font-style: normal; font-family: var(--font-t); font-weight: 800; font-size: 1.35em; color: #ffd24a; text-shadow: 0 0 12px rgba(255,210,74,.4); }
         .item-potencial.destaque .valor { white-space: nowrap; font-size: clamp(1.3em, 1.9vw, 1.8em); }
         .pz-itens div { flex-wrap: wrap; } .pz-itens span { margin-left: auto; }
         .pz-itens .pz-col { flex: 0 0 70px; margin-left: 0; text-align: center; }
@@ -965,6 +983,16 @@
                 </div>
                 <div class="pz-pg">🎫 Pagamento no <b>Ticket</b></div>
             </div>
+            <!-- PARCELOU, BATEU GANHOU -->
+            <div class="pz-card pz-ouro">
+                <div class="pz-head"><span class="pz-ico">📄</span><div><h4>PARCELOU, BATEU GANHOU! <span class="pz-tag">NOVO</span></h4><small>Meta de Parcelamento de Fatura</small></div></div>
+                <div class="pz-medalhas">
+                    <div><span class="pz-med">🥉</span><b>105%</b><small>DA META</small><i>R$ 100</i></div>
+                    <div><span class="pz-med">🥈</span><b>110%</b><small>DA META</small><i>R$ 150</i></div>
+                    <div><span class="pz-med">🥇</span><b>120%</b><small>DA META</small><i>R$ 200</i></div>
+                </div>
+                <div class="pz-pg">💸 Pagamento via <b>Magalupay</b></div>
+            </div>
         </div>
 
         <div class="bloco-potencial-ganho">
@@ -990,8 +1018,14 @@
                 <span class="plus">+</span>
                 <div class="item-potencial">
                     <span class="label">CARTÃO LUIZA</span>
-                    <span class="sub-label">( 25 CARTÕES )</span>
-                    <span class="valor">R$ 350,00</span>
+                    <span class="sub-label">( 8 CARTÕES )</span>
+                    <span class="valor">R$ 150,00</span>
+                </div>
+                <span class="plus">+</span>
+                <div class="item-potencial">
+                    <span class="label">PARCELOU, GANHOU</span>
+                    <span class="sub-label">( META PF 120% )</span>
+                    <span class="valor">R$ 200,00</span>
                 </div>
                 <span class="plus">+</span>
                 <div class="item-potencial">
