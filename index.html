@@ -1800,7 +1800,7 @@ document.addEventListener('keydown', e => {
     function atualizarRelogioSincronizacao() {
         let agora = new Date();
         let horaStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-        document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${horaStr}`;
+        document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${horaStr}` + textoRefProjecao();
     }
 
     function toggleMenuMobile() {
@@ -1993,6 +1993,65 @@ document.addEventListener('keydown', e => {
         else return num.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
     }
 
+    // ===== PROJEÇÃO DE ATINGIMENTO PELA EVOLUÇÃO DOS DIAS =====
+    // projeção % = (realizado ÷ dias até a atualização) × dias do mês ÷ meta × 100
+    // Os dias decorridos vêm da DATA DE ATUALIZAÇÃO dos indicadores (ex.: dados até dia 11 → 11 dias).
+    // A data é procurada nos dados recebidos (ver detectarDataAtualizacao); sem data, usa ontem.
+    let dataRefProjecao = null;
+
+    function lerDataTexto(v) {
+        if (v === null || v === undefined || v === '') return null;
+        const txt = String(v).trim();
+        let m = txt.match(/^(\d{4})-(\d{2})-(\d{2})T/);                 // ISO vindo do Apps Script (Date serializado)
+        if (m) { const d = new Date(txt); if (!isNaN(d)) return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+        m = txt.match(/(\d{4})-(\d{2})-(\d{2})/);                          // 2026-11-11
+        if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+        m = txt.toLowerCase().match(/(\d{1,2})\s*de\s*(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-zç.]*\s*(?:de\s*)?(\d{4})?/); // "11 de nov. de 2026" (Looker Studio)
+        if (m) { const mes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'].indexOf(m[2]); return new Date(m[3] ? +m[3] : new Date().getFullYear(), mes, +m[1]); }
+        m = txt.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);             // 11/11/2026 ou 11/11
+        if (m) { let ano = m[3] ? +m[3] : new Date().getFullYear(); if (ano < 100) ano += 2000; const d = new Date(ano, +m[2] - 1, +m[1]); if (d.getMonth() === +m[2] - 1) return d; }
+        return null;
+    }
+
+    function detectarDataAtualizacao(json) {
+        // 1) campo próprio enviado pelo Apps Script (recomendado)
+        for (const k of ['data_atualizacao', 'dataAtualizacao', 'atualizacao', 'data_ref', 'dataRef']) {
+            if (json && json[k] !== undefined) { const d = lerDataTexto(Array.isArray(json[k]) ? json[k].flat()[0] : json[k]); if (d) return d; }
+        }
+        // 2) texto tipo "Atualizado até 11/11" / "Data: 11/11/2026" nos cabeçalhos (2 primeiras linhas) das abas
+        const hoje = new Date(); let melhor = null;
+        for (const k of ['ct_colaborador', 'cartao', 'nsl_senior', 'super', 'sms', 'cp', 'pf']) {
+            const aba = json && json[k]; if (!Array.isArray(aba)) continue;
+            for (const linha of aba.slice(0, 2)) {
+                if (!Array.isArray(linha)) continue;
+                for (const cel of linha) {
+                    const t = String(cel ?? '');
+                    if (!/atualiz|data|ref|até|ate\b|dia/i.test(t) && !/^\d{4}-\d{2}-\d{2}T/.test(t)) continue;
+                    const d = lerDataTexto(t);
+                    if (d && d <= hoje && (hoje - d) < 40 * 864e5 && (!melhor || d > melhor)) melhor = d;
+                }
+            }
+        }
+        return melhor;
+    }
+
+    function diasProjecao() {
+        let ref = dataRefProjecao;
+        if (!ref) { const h = new Date(); ref = new Date(h.getFullYear(), h.getMonth(), h.getDate() - 1); } // sem data: até ontem
+        const total = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+        return { decorridos: Math.max(1, Math.min(total, ref.getDate())), total: total, ref: ref };
+    }
+    function textoRefProjecao() {
+        const d = diasProjecao(); const dd = String(d.ref.getDate()).padStart(2, '0'), mm = String(d.ref.getMonth() + 1).padStart(2, '0');
+        return ` • Projeção colaboradores até ${dd}/${mm} (${d.decorridos}/${d.total} dias)${dataRefProjecao ? '' : ' ⚠️ data não encontrada nos dados, usando ontem'}`;
+    }
+    function calcularProjecaoMes(realizado, meta) {
+        if (!meta || meta <= 0) return 0;
+        const dias = diasProjecao();
+        const projetado = (realizado / dias.decorridos) * dias.total;
+        return (projetado / meta) * 100;
+    }
+
     // Corrige arredondamento da fonte: 99,99% vira 100% e quem fez a meta (ex.: 4 de 4) nunca fica abaixo de 100%
     function ajustarPerc(perc, realizado, meta) {
         let p = Number(perc) || 0;
@@ -2123,6 +2182,7 @@ document.addEventListener('keydown', e => {
             }
         } catch(e) {}
 
+        dataRefProjecao = detectarDataAtualizacao(json);
         mapaColaboradoresGlobais = {};
         try {
             if (json.ct_colaborador && json.ct_colaborador.length > 0) {
@@ -2144,13 +2204,8 @@ document.addEventListener('keydown', e => {
                                 // independente do valor que vier na coluna de meta da planilha.
                                 const META_INDIVIDUAL_CARTAO = 8;
                                 let metaFinal = META_INDIVIDUAL_CARTAO;
-                                let proj = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
-                                if (metaOriginal !== metaFinal) {
-                                    // reescala a projeção da planilha (calculada sobre a meta original) para a meta de 8;
-                                    // sem meta original válida, usa realizado / 8
-                                    proj = (metaOriginal > 0 && proj > 0) ? proj * metaOriginal / metaFinal : (realizado / metaFinal) * 100;
-                                }
-                                proj = ajustarPerc(proj, realizado, metaFinal);
+                                // projeção própria (a coluna da planilha é calculada sobre a meta antiga)
+                                let proj = ajustarPerc(calcularProjecaoMes(realizado, metaFinal), realizado, metaFinal);
 
                                 mapaColaboradoresGlobais[numFilialLimpo].push({ nomeRaw: nomeColab, nome: formatarNomeColab(linha[2]), preAprovado: preAprov, realizado: realizado, meta: metaFinal, proj: proj });
                             }
@@ -2621,7 +2676,7 @@ document.addEventListener('keydown', e => {
             renderizarTela(json);
             document.getElementById('texto-carregando').innerText = '';
             document.getElementById('aviso-erro').style.display = 'none';
-            document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+            document.getElementById('rodape-sync').innerHTML = `🟢 Dados atualizados hoje às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}` + textoRefProjecao();
 
         } catch (erro) {
             if (tentativas > 1) {
