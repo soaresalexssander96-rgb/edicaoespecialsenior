@@ -2140,9 +2140,16 @@ document.addEventListener('keydown', e => {
                                 let preAprov = linha.length > 3 ? extrairNumero(linha[3]) : 0;
                                 let realizado = linha.length > 5 ? extrairNumero(linha[5]) : 0;
                                 let metaOriginal = linha.length > 7 ? extrairNumero(linha[7]) : 0;
-                                let metaFinal = metaOriginal < 4 ? 4 : metaOriginal;
+                                // CAMPANHA: meta individual de cartão é SEMPRE 8 (premiação começa a pagar com 8 cartões),
+                                // independente do valor que vier na coluna de meta da planilha.
+                                const META_INDIVIDUAL_CARTAO = 8;
+                                let metaFinal = META_INDIVIDUAL_CARTAO;
                                 let proj = linha.length > 8 ? extrairNumero(linha[8], true) : 0;
-                                if (metaOriginal !== metaFinal) proj = (realizado / metaFinal) * 100;
+                                if (metaOriginal !== metaFinal) {
+                                    // reescala a projeção da planilha (calculada sobre a meta original) para a meta de 8;
+                                    // sem meta original válida, usa realizado / 8
+                                    proj = (metaOriginal > 0 && proj > 0) ? proj * metaOriginal / metaFinal : (realizado / metaFinal) * 100;
+                                }
                                 proj = ajustarPerc(proj, realizado, metaFinal);
 
                                 mapaColaboradoresGlobais[numFilialLimpo].push({ nomeRaw: nomeColab, nome: formatarNomeColab(linha[2]), preAprovado: preAprov, realizado: realizado, meta: metaFinal, proj: proj });
@@ -2415,6 +2422,9 @@ document.addEventListener('keydown', e => {
 
     function fecharDetalhe() { filialAtiva = null; document.getElementById('tela-detalhe').style.display = 'none'; document.getElementById('topo-geral').style.display = 'block'; document.getElementById('tela-selecao').style.display = 'block'; document.querySelectorAll('.busca-ranking').forEach(input => { input.value = ''; }); filtrarSelecao('metas'); }
 
+    // Faixas da campanha de cartão (premiação individual)
+    const FAIXAS_CAMPANHA_CARTAO = [ { cartoes: 8, premio: 150 }, { cartoes: 15, premio: 250 }, { cartoes: 20, premio: 300 }, { cartoes: 25, premio: 350 } ];
+
     function compartilharEquipeWhatsApp(numFilial) {
         const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); const listaColab = mapaColaboradoresGlobais[numFilial]; if (!dadosS || !listaColab) return;
         let lojaBateuMeta = false; if (dadosS.detCartao.realizado >= dadosS.detCartao.metaCalculada) lojaBateuMeta = true;
@@ -2427,12 +2437,20 @@ document.addEventListener('keydown', e => {
             let nomeParaExibir = primeiroNome; if (contagemNomes[primeiroNome] > 1) nomeParaExibir = c.nome;
             nomeParaExibir = formatarNomeWhats(nomeParaExibir);
             texto += `👤 *${nomeParaExibir}*\n💳 Pré-aprovados: ${formatarValor(c.preAprovado, false)} | 🎯 Meta: ${formatarValor(c.meta, false)} | ✅ Feito: ${formatarValor(c.realizado, false)}\n`;
-            if (atingiu) texto += `🚀 *Bateu a meta!* Já garantiu premiação!\n\n`;
-            else { let falta = c.meta - c.realizado; if (falta === 1) texto += `⚠️ Falta 1 cartão para a meta!\n\n`; else texto += `⚠️ Faltam ${formatarValor(falta, false)} cartões para a meta!\n\n`; }
+            let faixaAtual = null, proxFaixa = null;
+            FAIXAS_CAMPANHA_CARTAO.forEach(f => { if (c.realizado >= f.cartoes) faixaAtual = f; else if (!proxFaixa) proxFaixa = f; });
+            if (faixaAtual) {
+                texto += `🚀 *Já garantiu R$ ${faixaAtual.premio}!* (faixa de ${faixaAtual.cartoes} cartões)\n`;
+                if (proxFaixa) { let falta = proxFaixa.cartoes - c.realizado; texto += `⬆️ ${falta === 1 ? 'Falta 1 cartão' : 'Faltam ' + formatarValor(falta, false) + ' cartões'} para subir para *R$ ${proxFaixa.premio}*!\n\n`; }
+                else texto += `🏆 *Faixa máxima da campanha!*\n\n`;
+            } else {
+                let falta = proxFaixa.cartoes - c.realizado;
+                texto += `⚠️ ${falta === 1 ? 'Falta 1 cartão' : 'Faltam ' + formatarValor(falta, false) + ' cartões'} para garantir *R$ ${proxFaixa.premio}*!\n\n`;
+            }
         });
-        texto += `💡 *LEMBRETE DA PREMIAÇÃO:*\nBatendo sua meta individual = *R$ 6,00 por cartão*.\nLoja batendo a meta (105%) = *DOBRA para R$ 12,00* por cartão!\n\n`;
-        if (lojaBateuMeta) texto += `🟢 *PARABÉNSSSS! A loja BATEU a meta!* R$ 12,00 por cartão GARANTIDO para quem bater individual! 💪`;
-        else { let faltaLoja = dadosS.detCartao.metaCalculada - dadosS.detCartao.realizado; if(faltaLoja > 0) texto += `Faltam ${formatarValor(faltaLoja, false)} cartões para a loja bater a meta! Vamos acelerar juntos para dobrar o prêmio de todo mundo! 🔥`; else texto += `Vamos acelerar juntos para dobrar o prêmio de todo mundo e bater a meta da loja! 🔥`; }
+        texto += `💡 *LEMBRETE DA PREMIAÇÃO (CAMPANHA):*\n` + FAIXAS_CAMPANHA_CARTAO.map(f => `💳 ${f.cartoes} cartões = *R$ ${f.premio}*`).join('\n') + `\n\n`;
+        if (lojaBateuMeta) texto += `🟢 *PARABÉNSSSS! A loja BATEU a meta!* Bora buscar a próxima faixa! 💪`;
+        else { let faltaLoja = dadosS.detCartao.metaCalculada - dadosS.detCartao.realizado; if(faltaLoja > 0) texto += `Faltam ${formatarValor(faltaLoja, false)} cartões para a loja bater a meta! Vamos acelerar juntos! 🔥`; else texto += `Vamos acelerar juntos e bater a meta da loja! 🔥`; }
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
