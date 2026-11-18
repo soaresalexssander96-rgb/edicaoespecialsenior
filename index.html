@@ -2118,6 +2118,9 @@ document.addEventListener('keydown', e => {
         return p;
     }
 
+    // META DO CARTÃO DO MÊS: % em cima da meta da planilha (troque aqui quando mudar a regra)
+    const META_CARTAO_PERC = 115;
+
     function mapearAbaIndicador(dadosAba, calcular105 = false) {
         let mapa = {};
         if (dadosAba && dadosAba.length > 0) {
@@ -2127,7 +2130,7 @@ document.addEventListener('keydown', e => {
                 let numF = limparChave(linha[0]);
                 if(numF) {
                     let metaOriginal = extrairNumero(linha[1]);
-                    let metaFinal = calcular105 ? Math.ceil(metaOriginal * 1.05) : metaOriginal;
+                    let metaFinal = calcular105 ? Math.ceil(metaOriginal * META_CARTAO_PERC / 100 - 1e-9) : metaOriginal;
                     let realizado = extrairNumero(linha[2]);
                     // compara com a meta como aparece na tela (4, não 3,9996)
                     let metaComparar = Math.round(metaOriginal * 100) / 100;
@@ -2512,7 +2515,7 @@ document.addEventListener('keydown', e => {
         document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao').style.display = 'none'; document.getElementById('tela-detalhe').style.display = 'block';
         let tituloDaCidade = esc(dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA');
         const sub = t => `<br><span style="font-size: 0.78em; font-weight: 600; font-family: var(--font); opacity:.85;">${t}</span>`;
-        document.getElementById('cardDetalheMax').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${dadosS.numFilial}</div><div class="detalhe-senior">👤 ${esc(nomeExibicao(dadosS))}</div></div><div class="grid-blocos-indicadores">${criarBlocoHTML('💳 CARTÃO' + sub('(META 105%) 25 PTS'), '#22d3ee', dadosS.detCartao, 'META', '', false)}${criarBlocoHTML('📄 PARCELAMENTO DE FATURA' + sub('20 PTS'), '#34f5a0', dadosS.detPf, 'META', '', true)}${criarBlocoHTML('🛡️ SUPER PROTEGIDO' + sub('15 PTS'), '#ffd24a', dadosS.detSuper, 'META', '', false)}${criarBlocoHTML('💬 SMS' + sub('10 PTS'), '#ff9f1c', dadosS.detSms, 'META', '', false)}${criarBlocoHTML('💰 CRÉDITO PESSOAL' + sub('10 PTS'), '#ff5470', dadosS.detCp, 'META', '', true)}${criarBlocoVenda1P('📦 VENDA 1P' + sub('10 PTS'), '#f5a524', dadosS.venda1p)}${criarBlocoNPS('😊 NPS' + sub('10 PTS (ATENDIMENTO)'), '#a78bfa', dadosS.nps)}${criarBlocoFPP('⭐ FPP BÔNUS 20%' + sub('(Cobrança CDC)'), '#ff9f1c', dadosS.detFpp)}</div>`;
+        document.getElementById('cardDetalheMax').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${dadosS.numFilial}</div><div class="detalhe-senior">👤 ${esc(nomeExibicao(dadosS))}</div></div><div class="grid-blocos-indicadores">${criarBlocoHTML('💳 CARTÃO' + sub(`(META ${META_CARTAO_PERC}%) 25 PTS`), '#22d3ee', dadosS.detCartao, 'META', '', false)}${criarBlocoHTML('📄 PARCELAMENTO DE FATURA' + sub('20 PTS'), '#34f5a0', dadosS.detPf, 'META', '', true)}${criarBlocoHTML('🛡️ SUPER PROTEGIDO' + sub('15 PTS'), '#ffd24a', dadosS.detSuper, 'META', '', false)}${criarBlocoHTML('💬 SMS' + sub('10 PTS'), '#ff9f1c', dadosS.detSms, 'META', '', false)}${criarBlocoHTML('💰 CRÉDITO PESSOAL' + sub('10 PTS'), '#ff5470', dadosS.detCp, 'META', '', true)}${criarBlocoVenda1P('📦 VENDA 1P' + sub('10 PTS'), '#f5a524', dadosS.venda1p)}${criarBlocoNPS('😊 NPS' + sub('10 PTS (ATENDIMENTO)'), '#a78bfa', dadosS.nps)}${criarBlocoFPP('⭐ FPP BÔNUS 20%' + sub('(Cobrança CDC)'), '#ff9f1c', dadosS.detFpp)}</div>`;
         window.scrollTo({ top: 0 });
         iniciarAnimacoes();
     }
@@ -2808,14 +2811,14 @@ document.addEventListener('keydown', e => {
     // PARCIAL DO ADMIN — gera a imagem do indicador para mandar no grupo
     // ==========================================
     const PARCIAL_TIPOS = {
-        cartao: { nome: 'Cartão',                 l2: 'CARTÃO',          det: s => s.detCartao, mon: false, metaSub: 'META 105%' },
+        cartao: { nome: 'Cartão',                 l2: 'CARTÃO',          det: s => s.detCartao, mon: false, metaSub: `META ${META_CARTAO_PERC}%` },
         super:  { nome: 'Super Protegido',        l2: 'SUPER PROTEGIDO', det: s => s.detSuper,  mon: false },
         sms:    { nome: 'SMS',                    l2: 'SMS',             det: s => s.detSms,    mon: false },
         pf:     { nome: 'Parcelamento de Fatura', l2: 'PARC. FATURA',    det: s => s.detPf,     mon: true },
         cp:     { nome: 'Crédito Pessoal',        l2: 'CRÉDITO PESSOAL', det: s => s.detCp,     mon: true },
         colab:  { nome: 'Cartão por Colaborador', l1: 'CARTÃO POR', l2: 'COLABORADOR' }
     };
-    const P_W = 1080, P_LINHAS_PAG = 40, P_ROW = 54, P_HEAD = 76, P_TOPO_TABELA = 510;
+    const P_W = 1080, P_LINHAS_PAG = 40, P_ROW = 48, P_HEAD = 70, P_TOPO_TABELA = 320;
     let parcialArquivos = [];
 
     function toggleParcialMenu() { document.getElementById('parcialMenu').classList.toggle('show'); }
@@ -2851,8 +2854,8 @@ document.addEventListener('keydown', e => {
         pFonte(ctx, 800, tam); ctx.fillStyle = cor; ctx.fillText(num, x, y);
     }
     function pPill(ctx, txt, cx, y, cor, tam = 23) {
-        pFonte(ctx, 900, tam); const w = Math.max(118, ctx.measureText(txt).width + 32), h = 38;
-        pRR(ctx, cx - w / 2, y - h / 2, w, h, 19); ctx.fillStyle = cor + '2e'; ctx.fill(); ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.stroke();
+        pFonte(ctx, 900, tam); const w = Math.max(118, ctx.measureText(txt).width + 32), h = 34;
+        pRR(ctx, cx - w / 2, y - h / 2, w, h, 17); ctx.fillStyle = cor + '2e'; ctx.fill(); ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.stroke();
         ctx.fillStyle = cor; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, cx, y + 1);
     }
     const pCorPerc = p => p >= 100 ? '#34f5a0' : (p >= 90 ? '#ff9f1c' : '#ff5470');
@@ -2880,32 +2883,19 @@ document.addEventListener('keydown', e => {
         for (let i = 0; i < 90; i++) {
             const x = rnd() * P_W, y = rnd() * H, r = 2 + rnd() * 4, a = .45 + rnd() * .55;
             if (y > P_TOPO_TABELA - 20 && y < P_TOPO_TABELA + tH + 20 && x > 30 && x < P_W - 30) continue;
-            if (y > 50 && y < 490 && x < 790) continue;   // não cai em cima do título
+            if (y > 40 && y < 300 && x < 790) continue;   // não cai em cima do título
+            if (y > P_TOPO_TABELA + tH + 15 && y < P_TOPO_TABELA + tH + 160 && x > 220 && x < 860) continue;   // nem no rodapé
             ctx.globalAlpha = a; ctx.fillStyle = cores[i % cores.length]; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
         }
         ctx.globalAlpha = 1;
 
         if (trofeu) {
-            const g = ctx.createRadialGradient(905, 200, 10, 905, 200, 190); g.addColorStop(0, 'rgba(255,210,74,.32)'); g.addColorStop(1, 'rgba(255,210,74,0)');
-            ctx.fillStyle = g; ctx.fillRect(700, 0, 380, 420);
-            ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10; ctx.drawImage(trofeu, 795, 60, 220, 264); ctx.restore();
+            const g = ctx.createRadialGradient(905, 175, 10, 905, 175, 170); g.addColorStop(0, 'rgba(255,210,74,.32)'); g.addColorStop(1, 'rgba(255,210,74,0)');
+            ctx.fillStyle = g; ctx.fillRect(700, 0, 380, 380);
+            ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10; ctx.drawImage(trofeu, 810, 50, 190, 228); ctx.restore();
         }
-        pTitulo(ctx, cfg.l1 || 'PARCIAL', 56, 196, 116, [[0, '#ffffff'], [.55, '#d4d4dc'], [1, '#6a6a75']], 715);
-        pTitulo(ctx, cfg.l2, 56, 318, 116, [[0, '#fff6c2'], [.45, '#ffd24a'], [1, '#c27a0a']], 715);
-
-        // faixa "BLACK DAS BLACK'S · MÊS / ANO"
-        const p1 = "BLACK DAS BLACK'S  ·  ", p2 = `${meses[mesTitulo]} / ${anoTitulo}`;
-        pFonte(ctx, 800, 25); pEsp(ctx, 3);
-        const w1 = ctx.measureText(p1).width, w2 = ctx.measureText(p2).width, wF = w1 + w2 + 64;
-        pRR(ctx, 56, 356, wF, 62, 31); ctx.fillStyle = 'rgba(6,8,18,.85)'; ctx.fill();
-        const gb = ctx.createLinearGradient(56, 0, 56 + wF, 0); gb.addColorStop(0, '#22d3ee'); gb.addColorStop(.6, '#ff2d8a'); gb.addColorStop(1, '#ffd24a');
-        ctx.strokeStyle = gb; ctx.lineWidth = 3; ctx.stroke();
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ffffff'; ctx.fillText(p1, 88, 388); ctx.fillStyle = '#ffd24a'; ctx.fillText(p2, 88 + w1, 388);
-        pEsp(ctx, 0);
-
-        const d = diasProjecao(), dd = String(d.ref.getDate()).padStart(2, '0'), mm = String(d.ref.getMonth() + 1).padStart(2, '0');
-        pTexto(ctx, `📅 PARCIAL ATÉ ${dd}/${mm}  ·  DIA ${d.decorridos} DE ${d.total}${totalPag > 1 ? `  ·  PÁG. ${pagina}/${totalPag}` : ''}`, 60, 462, { tam: 23, peso: 700, cor: '#c9d2ea' });
+        pTitulo(ctx, cfg.l1 || 'PARCIAL', 56, 160, 104, [[0, '#ffffff'], [.55, '#d4d4dc'], [1, '#6a6a75']], 715);
+        pTitulo(ctx, cfg.l2, 56, 268, 104, [[0, '#fff6c2'], [.45, '#ffd24a'], [1, '#c27a0a']], 715);
 
         // caixa da tabela
         pRR(ctx, 40, P_TOPO_TABELA, P_W - 80, tH, 26); ctx.fillStyle = 'rgba(8,10,22,.84)'; ctx.fill();
@@ -2913,12 +2903,19 @@ document.addEventListener('keydown', e => {
         gt.addColorStop(0, '#22d3ee'); gt.addColorStop(.35, '#9b00e8'); gt.addColorStop(.7, '#ff2d8a'); gt.addColorStop(1, '#ffd24a');
         ctx.strokeStyle = gt; ctx.lineWidth = 3; ctx.stroke();
 
-        // rodapé
-        const yR = P_TOPO_TABELA + tH + 86;
-        pFonte(ctx, 800, 54, 'Sora'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        const gr = ctx.createLinearGradient(P_W / 2 - 330, 0, P_W / 2 + 330, 0); gr.addColorStop(0, '#9b00e8'); gr.addColorStop(.5, '#ff2d8a'); gr.addColorStop(1, '#ff8c00');
-        ctx.fillStyle = gr; ctx.fillText('BORA PRA CIMA, TIME! 🚀', P_W / 2, yR);
-        pEsp(ctx, 3); pTexto(ctx, 'MATERIAL DE USO INTERNO  ·  REGIONAL CAMPO BOM', P_W / 2, yR + 56, { tam: 19, peso: 700, cor: '#8d99ba', alinhar: 'center' }); pEsp(ctx, 0);
+        // rodapé: data da parcial + faixa "BLACK DAS BLACK'S · MÊS / ANO" (centralizados)
+        const yRod = P_TOPO_TABELA + tH;
+        const d = diasProjecao(), dd = String(d.ref.getDate()).padStart(2, '0'), mm = String(d.ref.getMonth() + 1).padStart(2, '0');
+        pTexto(ctx, `📅 PARCIAL ATÉ ${dd}/${mm}${totalPag > 1 ? `  ·  PÁG. ${pagina}/${totalPag}` : ''}`, P_W / 2, yRod + 46, { tam: 24, peso: 800, cor: '#c9d2ea', alinhar: 'center' });
+        const p1 = "BLACK DAS BLACK'S  ·  ", p2 = `${meses[mesTitulo]} / ${anoTitulo}`;
+        pFonte(ctx, 800, 25); pEsp(ctx, 3);
+        const w1 = ctx.measureText(p1).width, w2 = ctx.measureText(p2).width, wF = w1 + w2 + 64, xF = (P_W - wF) / 2, yF = yRod + 84;
+        pRR(ctx, xF, yF, wF, 58, 29); ctx.fillStyle = 'rgba(6,8,18,.85)'; ctx.fill();
+        const gb = ctx.createLinearGradient(xF, 0, xF + wF, 0); gb.addColorStop(0, '#22d3ee'); gb.addColorStop(.6, '#ff2d8a'); gb.addColorStop(1, '#ffd24a');
+        ctx.strokeStyle = gb; ctx.lineWidth = 3; ctx.stroke();
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff'; ctx.fillText(p1, xF + 32, yF + 30); ctx.fillStyle = '#ffd24a'; ctx.fillText(p2, xF + 32 + w1, yF + 30);
+    pEsp(ctx, 0);
     }
 
     function pCabecalho(ctx, colunas) {
@@ -2941,9 +2938,9 @@ document.addEventListener('keydown', e => {
     // ---- uma página da parcial ----
     function pPagina(tipo, itens, inicio, pagina, totalPag, trofeu, totalGeral) {
         const cfg = PARCIAL_TIPOS[tipo];
-        const temTotal = pagina === totalPag;
-        const tH = P_HEAD + itens.length * P_ROW + (temTotal ? P_ROW + 12 : 0) + 18;
-        const H = P_TOPO_TABELA + tH + 190;
+        const temTotal = false;   // linha de total regional desligada
+        const tH = P_HEAD + itens.length * P_ROW + 14;
+        const H = P_TOPO_TABELA + tH + 180;
         const cv = document.createElement('canvas'); cv.width = P_W; cv.height = H;
         const ctx = cv.getContext('2d');
         pMoldura(ctx, H, cfg, pagina, totalPag, trofeu, tH);
@@ -2951,8 +2948,8 @@ document.addEventListener('keydown', e => {
 
         if (tipo === 'colab') {
             pCabecalho(ctx, [
-                { t: 'COLABORADOR', x: 80, esq: true }, { t: '🏪 FILIAL', x: 528, cor: '#ffd24a' },
-                { t: '💳 FEITO', s: 'CARTÕES', x: 648, cor: '#22d3ee' }, { t: '🎁 PRÊMIO', s: 'GARANTIDO', x: 790, cor: '#34f5a0' },
+                { t: 'COLABORADOR', x: 80, esq: true }, { t: '🏪 FILIAL', x: 500, cor: '#ffd24a' },
+                { t: 'REALIZADO', s: 'CARTÕES', x: 643, cor: '#22d3ee' }, { t: '🎁 PRÊMIO', s: 'GARANTIDO', x: 790, cor: '#34f5a0' },
                 { t: '⬆️ PRÓXIMA', s: 'FAIXA', x: 940, cor: '#ff8fb8' }
             ]);
             itens.forEach((c, i) => {
@@ -2961,8 +2958,8 @@ document.addEventListener('keydown', e => {
                 const partes = String(c.nome).trim().split(/\s+/); const nomeCurto = partes.length > 1 ? partes[0] + ' ' + partes[partes.length - 1] : partes[0];
                 pTexto(ctx, `${inicio + i + 1}º`, 80, cy, { tam: 19, peso: 800, cor: '#8d99ba' });
                 pTexto(ctx, nomeCurto, 132, cy, { tam: 23, peso: 800, cor: '#ffffff', maxW: 330 });
-                pTexto(ctx, `FL ${c.filial}`, 528, cy, { tam: 22, peso: 800, cor: '#ffd24a', alinhar: 'center' });
-                pValor(ctx, c.realizado, false, 648, cy, atual ? '#34f5a0' : '#ffffff', 28);
+                pTexto(ctx, `FL ${c.filial}`, 500, cy, { tam: 22, peso: 800, cor: '#ffd24a', alinhar: 'center' });
+                pValor(ctx, c.realizado, false, 643, cy, atual ? '#34f5a0' : '#ffffff', 28);
                 if (atual) pPill(ctx, `R$ ${atual.premio}`, 785, cy, '#34f5a0', 20); else pTexto(ctx, '—', 790, cy, { tam: 26, peso: 800, cor: '#5b6683', alinhar: 'center' });
                 if (prox) pTexto(ctx, `+${formatarValor(prox.cartoes - c.realizado, false)} → R$ ${prox.premio}`, 940, cy, { tam: 20, peso: 800, cor: '#ffd24a', alinhar: 'center' });
                 else pTexto(ctx, 'FAIXA MÁX. 🏆', 940, cy, { tam: 18, peso: 900, cor: '#34f5a0', alinhar: 'center' });
@@ -2976,7 +2973,7 @@ document.addEventListener('keydown', e => {
         } else {
             pCabecalho(ctx, [
                 { t: 'FILIAL', x: 80, esq: true }, { t: '🎯 META', s: cfg.metaSub || '', x: 430, cor: '#22d3ee' },
-                { t: '✅ FEITO', x: 592, cor: '#ffd24a' }, { t: '⏳ FALTA', x: 754, cor: '#ff8fb8' },
+                { t: '✅ REALIZADO', x: 592, cor: '#ffd24a' }, { t: '⏳ FALTA', x: 754, cor: '#ff8fb8' },
                 { t: '📈 PROJEÇÃO', s: 'DO MÊS', x: 920, cor: '#34f5a0' }
             ]);
             itens.forEach((s, i) => {
