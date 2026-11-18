@@ -735,7 +735,7 @@
         <input type="password" id="input-senha" class="input-login" placeholder="SENHA: ( ID ATRÁS DO CRACHÁ )" autocomplete="current-password">
         <button onclick="validarAcesso()" class="btn-top10" style="width:100%;">Entrar no Sistema</button>
         <div id="login-erro">Credenciais inválidas. Tente novamente.</div>
-        <div id="login-loading">Sincronizando Base de Dados... ⏳</div>
+        <div id="login-loading" style="display:none;">Verificando acesso... ⏳</div>
     </div>
 </div>
 
@@ -1069,17 +1069,37 @@
     // ==========================================
     // COLE A SUA NOVA URL DO GOOGLE AQUI DENTRO DAS ASPAS:
     // ==========================================
-    const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzBRZf6LW32tvD5P01YoEkDjqo1mqQfl4wVnZ_hDjdjiY7Pqbk474SYeu3jwU75L-ea/exec';
+    const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzGi892woqnrMzdInH9iJXqnQG27_NYtXhiL24QKGydrDw1MhD8pWsIGbWkTj2kO5_k/exec';
 
     // ==========================================
     // VARIÁVEIS DE SEGURANÇA E ACESSO
     // ==========================================
-    let cofreCredenciais = [];
+    // As senhas NÃO vêm mais para o navegador: o login é conferido no Apps Script,
+    // que devolve um token. Os dados de colaboradores só chegam com esse token.
+    let tokenSessao = null;
+    let dadosPrivados = null;
+    let ultimoJsonPublico = null;
     let isMasterLogado = false;
     let seniorLogadoFilial = null;
     let seniorLogadoNome = null;
     let mapaNomesQuadro = {};
     let abaPendente = null;
+
+    // Escapa texto vindo da planilha antes de colocar em innerHTML
+    function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // Avatar com iniciais gerado aqui mesmo (não envia o nome para sites de terceiros)
+    function avatarIniciais(nome, cor, tam) {
+        const ini = String(nome || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase() || '?';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tam}" height="${tam}" viewBox="0 0 100 100"><rect width="100" height="100" fill="#${cor}"/><text x="50" y="50" dy=".35em" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="40" font-weight="700" fill="#0b0f19">${esc(ini)}</text></svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    async function chamarServidor(params) {
+        const resp = await fetch(URL_WEB_APP, { method: 'POST', body: new URLSearchParams(params) });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.json();
+    }
 
     // ==========================================
     // EFEITOS VISUAIS (padrão Troféu Global)
@@ -1590,23 +1610,18 @@ document.addEventListener('keydown', e => {
         });
     }
 
-    // ==========================================
-    // REGISTRO DE ACESSO (mesmo padrão do painel dos gerentes)
-    // Envia 1 log por filial por sessão do navegador. O Master não é registrado.
-    // ==========================================
-    function registrarAcesso(filial, login) {
-        if (!filial || filial === 'ADMIN') return;
-        const chave = 'log_enviado_senior_' + filial;
-        try { if (sessionStorage.getItem(chave)) return; } catch (e) {}
-        try {
-            fetch(URL_WEB_APP, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `action=log_acesso&filial=${encodeURIComponent(filial)}&login=${encodeURIComponent(login || '')}&painel=SENIOR`
-            });
-            try { sessionStorage.setItem(chave, 'true'); } catch (e) {}
-        } catch (e) {}
+    // O registro de acesso (LOG_ACESSOS) agora é feito pelo próprio Apps Script no login.
+
+    // Busca os dados restritos (colaboradores) usando o token do login
+    async function carregarDadosPrivados() {
+        if (!tokenSessao) return;
+        const r = await chamarServidor({ action: 'dados', token: tokenSessao });
+        if (r.erro) {
+            if (r.erro === 'sessao_expirada') { showToast('Sua sessão expirou. Entre novamente.', 'erro'); fazerLogout(); }
+            return;
+        }
+        dadosPrivados = { ct_colaborador: r.ct_colaborador || [], quadro_vendedor: r.quadro_vendedor || [] };
+        if (ultimoJsonPublico) renderizarTela(ultimoJsonPublico);
     }
 
     function fazerLogout() {
@@ -1614,6 +1629,10 @@ document.addEventListener('keydown', e => {
         seniorLogadoFilial = null;
         seniorLogadoNome = null;
         abaPendente = null;
+        tokenSessao = null;
+        dadosPrivados = null;
+        filialAtiva = null;
+        if (ultimoJsonPublico) renderizarTela(ultimoJsonPublico);   // apaga os colaboradores da memória
 
         document.getElementById('share-container').style.display = 'flex';
         if(document.getElementById('btnTop10Geral')) {
@@ -1661,10 +1680,13 @@ document.addEventListener('keydown', e => {
         document.getElementById('login-erro').style.display = 'none';
     }
 
-    function validarAcesso() {
+    let loginEmAndamento = false;
+    async function validarAcesso() {
+        if (loginEmAndamento) return;
         let usuarioDigitado = document.getElementById('input-usuario').value.trim().toUpperCase();
         let senhaDigitada = document.getElementById('input-senha').value.trim();
         let erroBox = document.getElementById('login-erro');
+        const loading = document.getElementById('login-loading');
 
         if(usuarioDigitado === '' || senhaDigitada === '') {
             erroBox.innerText = "Por favor, preencha o Login e a Senha.";
@@ -1672,41 +1694,33 @@ document.addEventListener('keydown', e => {
             return;
         }
 
-        if (usuarioDigitado === 'ALR_SOARES' && senhaDigitada === '251148') {
-            isMasterLogado = true;
-            seniorLogadoFilial = null;
-            seniorLogadoNome = null;
-            const destinoMaster = abaPendente;   // guarda a aba antes do fecharLogin() limpar
-            fecharLogin();
-            if (visaoMetas === 'ranking') renderRankingIndicadores();
-
-            document.getElementById('btn-logout').style.display = 'flex';
-
-            if(destinoMaster) {
-                executarTrocaAba(destinoMaster);
-                abaPendente = null;
+        loginEmAndamento = true;
+        erroBox.style.display = 'none';
+        loading.style.display = 'block';
+        try {
+            // A senha é conferida no servidor (Apps Script), nunca aqui no navegador
+            const r = await chamarServidor({ action: 'login', login: usuarioDigitado, senha: senhaDigitada });
+            if (!r.ok) {
+                erroBox.innerText = r.erro || "Acesso Negado: Login ou Senha (ID) incorretos.";
+                erroBox.style.display = 'block';
+                return;
             }
-            return;
-        }
+            tokenSessao = r.token;
+            isMasterLogado = !!r.master;
+            seniorLogadoFilial = r.master ? null : String(r.filial);
+            seniorLogadoNome = r.master ? null : (r.nome || null);
+            document.getElementById('input-senha').value = '';
 
-        let userAutorizado = cofreCredenciais.find(cred => cred.login === usuarioDigitado && cred.senha === senhaDigitada);
+            await carregarDadosPrivados();
 
-        if (userAutorizado) {
-            isMasterLogado = false;
-            seniorLogadoFilial = userAutorizado.filial;
-            seniorLogadoNome = userAutorizado.representante ? (userAutorizado.nome || null) : null;
-
-            registrarAcesso(userAutorizado.filial, userAutorizado.login);
-
-            aplicarTravaSenior();
-
-            if(document.getElementById('btnTop10Geral')) {
+            if (!isMasterLogado && document.getElementById('btnTop10Geral')) {
                 document.getElementById('btnTop10Geral').style.display = 'none';
             }
-
             document.getElementById('btn-logout').style.display = 'flex';
+
             const destino = abaPendente;   // guarda a aba antes do fecharLogin() limpar
             fecharLogin();
+            aplicarTravaSenior();
             filtrarSelecao('metas'); filtrarSelecao('simul'); filtrarSelecao('colab');
             if (visaoMetas === 'ranking') renderRankingIndicadores();
 
@@ -1714,9 +1728,12 @@ document.addEventListener('keydown', e => {
                 executarTrocaAba(destino);
                 abaPendente = null;
             }
-        } else {
-            erroBox.innerText = "Acesso Negado: Login ou Senha (ID) incorretos.";
+        } catch (e) {
+            erroBox.innerText = "Não foi possível conectar ao servidor. Verifique a internet e tente novamente.";
             erroBox.style.display = 'block';
+        } finally {
+            loginEmAndamento = false;
+            loading.style.display = 'none';
         }
     }
 
@@ -2081,55 +2098,33 @@ document.addEventListener('keydown', e => {
         return mapa;
     }
 
-    function renderizarTela(json) {
+    function renderizarTela(jsonPublico) {
+        // dados públicos (ranking) + dados restritos (colaboradores), se houver login
+        ultimoJsonPublico = jsonPublico;
+        const json = Object.assign({}, jsonPublico, dadosPrivados || {});
+
         let mapaCidades = {};
         mapaNomesQuadro = {};
-        cofreCredenciais = [];
-        let dadosQuadro = json.quadro || [];
 
-        if (dadosQuadro.length > 0) {
-            // REGRA DA LINHA EM BRANCO:
-            // acima da 1ª linha totalmente vazia = quem representa a loja (nome/foto no ranking)
-            // abaixo dela = só tem acesso ao painel (login), não aparece no ranking
-            let jaTeveDados = false;
-            let abaixoDaLinhaVazia = false;
-            for(let i = 1; i < dadosQuadro.length; i++) {
-                let linha = dadosQuadro[i];
-                let linhaVazia = !linha || linha.every(cel => cel === null || cel === undefined || String(cel).trim() === '');
-                if (linhaVazia) { if (jaTeveDados) abaixoDaLinhaVazia = true; continue; }
-                jaTeveDados = true;
-                const representante = !abaixoDaLinhaVazia;
-                if(linha && linha.length > 0) {
-                    let f = limparChave(linha[0]);
-                    let c = linha.length > 1 && linha[1] ? linha[1].toString().trim() : '';
-                    let urlFotoRaw = '';
-                    if (linha.length > 11 && linha[11]) urlFotoRaw = linha[11].toString().trim();
-                    else { for(let col = linha.length - 1; col >= 2; col--) { if(linha[col] && linha[col].toString().includes('drive.google.com')) { urlFotoRaw = linha[col].toString().trim(); break; } } }
-
-                    let novaFoto = obterUrlImagem(urlFotoRaw);
-                    if(f && !representante) {
-                        if (!mapaCidades[f] && c) mapaCidades[f] = { cidade: c, foto: '' };
-                    } else if(f) {
-                        if (!mapaCidades[f]) mapaCidades[f] = { cidade: c, foto: novaFoto };
-                        else { if (novaFoto && novaFoto !== '') mapaCidades[f].foto = novaFoto; if (c && c.trim() !== '') mapaCidades[f].cidade = c; }
-                    }
-
-                    let filialAlvo = f;
-                    let senhaID = linha.length > 3 && linha[3] ? String(linha[3]).trim() : '';
-                    let loginPortal = linha.length > 5 && linha[5] ? String(linha[5]).trim().toUpperCase() : 'NULL';
-                    if (loginPortal === '') loginPortal = 'NULL';
-
-                    let nomeQuadro = linha.length > 4 && linha[4] ? String(linha[4]).trim().toUpperCase() : '';
-                    if(filialAlvo !== '' && senhaID !== '') {
-                        cofreCredenciais.push({ filial: filialAlvo, login: loginPortal, senha: senhaID, nome: nomeQuadro, representante: representante });
-                        if (nomeQuadro && representante) {
-                            if (!mapaNomesQuadro[filialAlvo]) mapaNomesQuadro[filialAlvo] = [];
-                            if (!mapaNomesQuadro[filialAlvo].includes(nomeQuadro)) mapaNomesQuadro[filialAlvo].push(nomeQuadro);
-                        }
-                    }
-                }
+        // QUADRO já vem do servidor sem senha/login (a regra da linha em branco é aplicada lá):
+        // representante = nome/foto no ranking; não representante = só a cidade
+        (json.quadro_publico || []).forEach(q => {
+            const f = limparChave(q.filial);
+            if (!f) return;
+            const c = q.cidade ? String(q.cidade).trim() : '';
+            if (!q.representante) {
+                if (!mapaCidades[f] && c) mapaCidades[f] = { cidade: c, foto: '' };
+                return;
             }
-        }
+            const novaFoto = obterUrlImagem(q.foto);
+            if (!mapaCidades[f]) mapaCidades[f] = { cidade: c, foto: novaFoto };
+            else { if (novaFoto) mapaCidades[f].foto = novaFoto; if (c) mapaCidades[f].cidade = c; }
+            const nomeQuadro = q.nome ? String(q.nome).trim().toUpperCase() : '';
+            if (nomeQuadro) {
+                if (!mapaNomesQuadro[f]) mapaNomesQuadro[f] = [];
+                if (!mapaNomesQuadro[f].includes(nomeQuadro)) mapaNomesQuadro[f].push(nomeQuadro);
+            }
+        });
 
         let mapaFpp = {};
         if (json.fpp && json.fpp.length > 0) {
@@ -2303,20 +2298,26 @@ document.addEventListener('keydown', e => {
             let primeiros = s.nomesQuadro.map(x => formatarNomeWhats(x.split(' ')[0]));
             let txt = primeiros.length === 2 ? primeiros.join(' e ') : primeiros.slice(0, -1).join(', ') + ' e ' + primeiros[primeiros.length - 1];
             elNome.classList.add('nome-multi');
-            elNome.innerHTML = txt;
+            elNome.textContent = txt;
             n = primeiros.join(' ');
         } else {
             elNome.classList.remove('nome-multi');
-            elNome.innerHTML = `<span class="nome-desk">${n}</span><span class="nome-mob">${n.split(' ')[0]}</span>`;
+            elNome.innerHTML = `<span class="nome-desk">${esc(n)}</span><span class="nome-mob">${esc(n.split(' ')[0])}</span>`;
         }
         document.getElementById('filial-' + p).innerText = `FL ${s.numFilial}${s.cidade ? ' - ' + s.cidade.toUpperCase() : ''}`;
         document.getElementById('pontos-' + p).innerText = s.pontos.toFixed(1) + ' pts';
-        const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=${cor}&color=0b0f19&size=${tam}&bold=true`;
+        const fb = avatarIniciais(n, cor, tam);
         let imgUrl = s.foto;
-        if (!imgUrl || !imgUrl.startsWith('http')) imgUrl = fb;
+        if (!imgUrl || !/^https:\/\//i.test(imgUrl)) imgUrl = fb;   // só aceita links https
         const av = document.getElementById('avatar-' + p);
         av.style.display = 'flex';
-        av.innerHTML = `<img src="${imgUrl}" crossorigin="anonymous" alt="${p}º Lugar" onerror="this.onerror=null;this.src='${fb}';">`;
+        av.innerHTML = '';
+        const img = document.createElement('img');
+        img.crossOrigin = 'anonymous';
+        img.alt = p + 'º Lugar';
+        img.onerror = function () { this.onerror = null; this.src = fb; };
+        img.src = imgUrl;
+        av.appendChild(img);
     }
 
     function popularSelectFiliais(lista) {
@@ -2330,7 +2331,7 @@ document.addEventListener('keydown', e => {
             <div class="item-lista">
                 <span class="posicao-lista">${i + 1}º</span>
                 <div class="nome-wrap">
-                    <span class="nome-filial">${textoFilial}</span>
+                    <span class="nome-filial">${esc(textoFilial)}</span>
                     <div class="barra"><i style="width:${pct.toFixed(1)}%"></i></div>
                 </div>
                 <span class="pontos-filial">${lista[i].pontos.toFixed(1)} pts</span>
@@ -2342,7 +2343,7 @@ document.addEventListener('keydown', e => {
         listaFiliais.forEach(s => {
             let textoOpcao = `FL ${s.numFilial}`;
             if(s.cidade) textoOpcao += ` - ${s.cidade.toUpperCase()}`;
-            let itemTemplate = `<div class="item-lista" onclick="abrirContexto('THIS_CONTEXT', '${s.numFilial}')"><div class="nome-wrap"><span class="nome-filial">${textoOpcao}</span></div><span class="acessar-lista">Acessar ➔</span></div>`;
+            let itemTemplate = `<div class="item-lista" onclick="abrirContexto('THIS_CONTEXT', '${s.numFilial}')"><div class="nome-wrap"><span class="nome-filial">${esc(textoOpcao)}</span></div><span class="acessar-lista">Acessar ➔</span></div>`;
             htmlOpcoesMetas += itemTemplate.replace('THIS_CONTEXT', 'metas');
             htmlOpcoesSimul += itemTemplate.replace('THIS_CONTEXT', 'simul');
             htmlOpcoesColab += itemTemplate.replace('THIS_CONTEXT', 'colab');
@@ -2431,7 +2432,7 @@ document.addEventListener('keydown', e => {
             const minha = seniorLogadoFilial && !isMasterLogado && s.numFilial === seniorLogadoFilial;
             const cls = [(rkDir === 'desc' && pos <= 3) ? 'top3' : '', minha ? 'minha' : ''].join(' ').trim();
             const titulo = rkOrdem === 'pontos' ? '' : ` title="${posOficial[s.numFilial]}º no ranking geral"`;
-            const cidadeRk = s.cidade ? `<span class="rk-cid"><span class="rk-sep"> - </span>${s.cidade.toUpperCase()}</span>` : '';
+            const cidadeRk = s.cidade ? `<span class="rk-cid"><span class="rk-sep"> - </span>${esc(s.cidade.toUpperCase())}</span>` : '';
             linhas += `<tr class="${cls}"><td${titulo}><span class="pos">${pos}º</span>FL ${s.numFilial}${cidadeRk}</td>${RK_COLUNAS.map(c => rkCelula(c, s)).join('')}</tr>`;
         });
 
@@ -2468,9 +2469,9 @@ document.addEventListener('keydown', e => {
     function abrirDetalhe(numFilial) {
         filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); if(!dadosS) return;
         document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao').style.display = 'none'; document.getElementById('tela-detalhe').style.display = 'block';
-        let tituloDaCidade = dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA';
+        let tituloDaCidade = esc(dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA');
         const sub = t => `<br><span style="font-size: 0.78em; font-weight: 600; font-family: var(--font); opacity:.85;">${t}</span>`;
-        document.getElementById('cardDetalheMax').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${dadosS.numFilial}</div><div class="detalhe-senior">👤 ${nomeExibicao(dadosS)}</div></div><div class="grid-blocos-indicadores">${criarBlocoHTML('💳 CARTÃO' + sub('(META 105%) 25 PTS'), '#22d3ee', dadosS.detCartao, 'META', '', false)}${criarBlocoHTML('📄 PARCELAMENTO DE FATURA' + sub('20 PTS'), '#34f5a0', dadosS.detPf, 'META', '', true)}${criarBlocoHTML('🛡️ SUPER PROTEGIDO' + sub('15 PTS'), '#ffd24a', dadosS.detSuper, 'META', '', false)}${criarBlocoHTML('💬 SMS' + sub('10 PTS'), '#ff9f1c', dadosS.detSms, 'META', '', false)}${criarBlocoHTML('💰 CRÉDITO PESSOAL' + sub('10 PTS'), '#ff5470', dadosS.detCp, 'META', '', true)}${criarBlocoVenda1P('📦 VENDA 1P' + sub('10 PTS'), '#f5a524', dadosS.venda1p)}${criarBlocoNPS('😊 NPS' + sub('10 PTS (ATENDIMENTO)'), '#a78bfa', dadosS.nps)}${criarBlocoFPP('⭐ FPP BÔNUS 20%' + sub('(Cobrança CDC)'), '#ff9f1c', dadosS.detFpp)}</div>`;
+        document.getElementById('cardDetalheMax').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${dadosS.numFilial}</div><div class="detalhe-senior">👤 ${esc(nomeExibicao(dadosS))}</div></div><div class="grid-blocos-indicadores">${criarBlocoHTML('💳 CARTÃO' + sub('(META 105%) 25 PTS'), '#22d3ee', dadosS.detCartao, 'META', '', false)}${criarBlocoHTML('📄 PARCELAMENTO DE FATURA' + sub('20 PTS'), '#34f5a0', dadosS.detPf, 'META', '', true)}${criarBlocoHTML('🛡️ SUPER PROTEGIDO' + sub('15 PTS'), '#ffd24a', dadosS.detSuper, 'META', '', false)}${criarBlocoHTML('💬 SMS' + sub('10 PTS'), '#ff9f1c', dadosS.detSms, 'META', '', false)}${criarBlocoHTML('💰 CRÉDITO PESSOAL' + sub('10 PTS'), '#ff5470', dadosS.detCp, 'META', '', true)}${criarBlocoVenda1P('📦 VENDA 1P' + sub('10 PTS'), '#f5a524', dadosS.venda1p)}${criarBlocoNPS('😊 NPS' + sub('10 PTS (ATENDIMENTO)'), '#a78bfa', dadosS.nps)}${criarBlocoFPP('⭐ FPP BÔNUS 20%' + sub('(Cobrança CDC)'), '#ff9f1c', dadosS.detFpp)}</div>`;
         window.scrollTo({ top: 0 });
         iniciarAnimacoes();
     }
@@ -2511,7 +2512,7 @@ document.addEventListener('keydown', e => {
 
     function criarBlocoColaboradorHTML(colab, isGlobal = false) {
         let percValue = parseFloat(colab.proj) || 0; let prog = getProgressStyle(percValue); let emoji = '🏃'; if (percValue >= 120) emoji = '🔥'; else if (percValue >= 100) emoji = '⭐';
-        let nomeTitle = isGlobal ? colab.nome : `${emoji} ${colab.nome}`;
+        let nomeTitle = isGlobal ? colab.nome : `${emoji} ${esc(colab.nome)}`;
         return `<div class="bloco-indicador"><h4 class="titulo-bloco" style="color: #ffffff; margin-bottom: 15px; font-size: 1.05em; text-align: left; padding-left: 12px; border-left: 4px solid var(--cyan);">${nomeTitle}</h4><div class="ind-grid-3"><div class="item-ind-max"><div class="label-ind-max">PRÉ APROVADO</div><div class="val-ind-max animar-numero" data-valor="${colab.preAprovado}" data-tipo="num" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">META</div><div class="val-ind-max animar-numero" data-valor="${colab.meta}" data-tipo="num" style="color: #ffffff;">0</div></div><div class="item-ind-max"><div class="label-ind-max">REALIZADO</div><div class="val-ind-max animar-numero" data-valor="${colab.realizado}" data-tipo="num" style="color: #ffffff;">0</div></div></div><div style="margin-top: 15px; text-align: center;"><div class="label-ind-max" style="margin-bottom: 5px;">PROJEÇÃO DE ATINGIMENTO</div><div class="progress-bg"><div class="progress-fill ${prog.classe}" data-target-width="${Math.min(percValue, 100)}%" style="width: 0%; background: ${prog.cor}; box-shadow: 0 0 10px ${prog.cor};"></div><div class="progress-text animar-numero" data-valor="${colab.proj}" data-tipo="perc" data-quasela="${prog.isQuase}" style="color: ${prog.isQuase ? 'white' : ''}">0%</div></div></div></div>`;
     }
 
@@ -2520,18 +2521,18 @@ document.addEventListener('keydown', e => {
         let todosColaboradores = [];
         for (let filial in mapaColaboradoresGlobais) { let cidade = "N/I"; let dadosSenior = listaCompletaSeniores.find(s => s.numFilial === filial); if (dadosSenior && dadosSenior.cidade) cidade = dadosSenior.cidade; mapaColaboradoresGlobais[filial].forEach(colab => { todosColaboradores.push({ ...colab, filialInfo: `FL ${filial} - ${cidade}` }); }); }
         todosColaboradores.sort((a, b) => b.proj - a.proj); let top10 = todosColaboradores.slice(0, 10);
-        let html = ''; top10.forEach((c, index) => { let pos = index + 1; let medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`; let colabFake = { ...c, nome: `${medalha} ${c.nome} <span style="font-size: 0.7em; color:var(--mut); margin-left: 10px; font-family: var(--font);">(${c.filialInfo})</span>` }; html += criarBlocoColaboradorHTML(colabFake, true); });
+        let html = ''; top10.forEach((c, index) => { let pos = index + 1; let medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`; let colabFake = { ...c, nome: `${medalha} ${esc(c.nome)} <span style="font-size: 0.7em; color:var(--mut); margin-left: 10px; font-family: var(--font);">(${esc(c.filialInfo)})</span>` }; html += criarBlocoColaboradorHTML(colabFake, true); });
         document.getElementById('cardDetalheColab').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">🏆 TOP 10 COLABORADORES CARTÃO LUIZA 🏆</h3><div class="detalhe-cidade">REGIONAL CAMPO BOM</div></div><div style="display: flex; flex-direction: column; gap: 18px;">${html}</div>`;
         window.scrollTo({ top: 0 });
         iniciarAnimacoes();
     }
 
     function abrirDetalheColab(numFilial) {
-        filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); let tituloDaCidade = dadosS && dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA';
+        filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); let tituloDaCidade = esc(dadosS && dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA');
         document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao-colab').style.display = 'none'; document.getElementById('tela-detalhe-colab').style.display = 'block';
         let htmlColaboradores = ''; let listaColab = mapaColaboradoresGlobais[numFilial];
         if (listaColab && listaColab.length > 0) { listaColab.sort((a, b) => b.proj - a.proj); listaColab.forEach(colab => { htmlColaboradores += criarBlocoColaboradorHTML(colab); }); } else { htmlColaboradores = `<div style="text-align:center; padding: 40px; color: var(--mut);">Nenhum colaborador encontrado para esta filial no momento.</div>`; }
-        document.getElementById('cardDetalheColab').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${numFilial} - CARTÃO POR COLABORADOR</div>${dadosS ? `<div class="detalhe-senior">👤 ${nomeExibicao(dadosS)}</div>` : ''}<button class="btn-whatsapp-equipe" onclick="compartilharEquipeWhatsApp('${numFilial}')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.01 2.014c-5.465 0-9.895 4.43-9.895 9.895 0 1.745.454 3.447 1.316 4.954L2.014 22.01l5.282-1.385a9.854 9.854 0 0 0 4.714 1.196h.004c5.463 0 9.894-4.43 9.894-9.894 0-2.65-1.03-5.143-2.905-7.017A9.851 9.851 0 0 0 12.01 2.014zm5.42 14.28c-.227.639-1.316 1.233-1.815 1.306-.475.069-1.085.127-3.328-.801-2.73-1.13-4.48-3.92-4.615-4.1-.137-.181-1.103-1.467-1.103-2.798 0-1.332.693-1.986.942-2.26.248-.273.543-.341.724-.341.18 0 .362.003.52.01.183.008.428-.073.67.51.249.59.847 2.062.923 2.213.076.151.123.326.031.508-.09.182-.136.295-.272.453-.136.159-.286.342-.407.476-.137.152-.284.32-.122.598.163.28 .724 1.197 1.559 1.942 1.077.96 1.97 1.258 2.25 1.394.278.136.442.114.607-.068.164-.182.71-8.19.897-.109.188.272.76.012 1.168.212.408.2.338 1.487.338 1.487s.035.181-.19.82z"/></svg>Enviar no Grupo da Loja</button></div><div style="display: flex; flex-direction: column; gap: 18px;">${htmlColaboradores}</div>`;
+        document.getElementById('cardDetalheColab').innerHTML = `<div class="detalhe-header"><h3 class="detalhe-nome">${tituloDaCidade}</h3><div class="detalhe-cidade">FL ${numFilial} - CARTÃO POR COLABORADOR</div>${dadosS ? `<div class="detalhe-senior">👤 ${esc(nomeExibicao(dadosS))}</div>` : ''}<button class="btn-whatsapp-equipe" onclick="compartilharEquipeWhatsApp('${numFilial}')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.01 2.014c-5.465 0-9.895 4.43-9.895 9.895 0 1.745.454 3.447 1.316 4.954L2.014 22.01l5.282-1.385a9.854 9.854 0 0 0 4.714 1.196h.004c5.463 0 9.894-4.43 9.894-9.894 0-2.65-1.03-5.143-2.905-7.017A9.851 9.851 0 0 0 12.01 2.014zm5.42 14.28c-.227.639-1.316 1.233-1.815 1.306-.475.069-1.085.127-3.328-.801-2.73-1.13-4.48-3.92-4.615-4.1-.137-.181-1.103-1.467-1.103-2.798 0-1.332.693-1.986.942-2.26.248-.273.543-.341.724-.341.18 0 .362.003.52.01.183.008.428-.073.67.51.249.59.847 2.062.923 2.213.076.151.123.326.031.508-.09.182-.136.295-.272.453-.136.159-.286.342-.407.476-.137.152-.284.32-.122.598.163.28 .724 1.197 1.559 1.942 1.077.96 1.97 1.258 2.25 1.394.278.136.442.114.607-.068.164-.182.71-8.19.897-.109.188.272.76.012 1.168.212.408.2.338 1.487.338 1.487s.035.181-.19.82z"/></svg>Enviar no Grupo da Loja</button></div><div style="display: flex; flex-direction: column; gap: 18px;">${htmlColaboradores}</div>`;
         window.scrollTo({ top: 0 });
         iniciarAnimacoes();
     }
@@ -2541,7 +2542,7 @@ document.addEventListener('keydown', e => {
     function abrirDetalheSimulador(numFilial) {
         filialAtiva = numFilial; const dadosS = listaCompletaSeniores.find(s => s.numFilial === numFilial); if(!dadosS) return;
         document.getElementById('topo-geral').style.display = 'none'; document.getElementById('tela-selecao-simul').style.display = 'none'; document.getElementById('tela-detalhe-simul').style.display = 'block';
-        let tituloDaCidade = dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA'; let nomeDoSenior = nomeExibicao(dadosS);
+        let tituloDaCidade = esc(dadosS.cidade ? dadosS.cidade.toUpperCase() : 'CIDADE NÃO INFORMADA'); let nomeDoSenior = esc(nomeExibicao(dadosS));
         let pCartao = calcPerc(dadosS.detCartao.proj); let pPf = calcPerc(dadosS.detPf.proj); let pSuper = calcPerc(dadosS.detSuper.proj); let pCp = calcPerc(dadosS.detCp.proj); let pSms = calcPerc(dadosS.detSms.proj); let pVenda = calcPerc(dadosS.venda1p);
         let mCartao = getMultiplicador(pCartao); let mPf = getMultiplicador(pPf); let mSuper = getMultiplicador(pSuper); let mCp = getMultiplicador(pCp); let mSms = getMultiplicador(pSms); let mVenda = getMultiplicador(pVenda);
         let ptsCartao = 25 * mCartao; let ptsPf = 20 * mPf; let ptsSuper = 15 * mSuper; let ptsCp = 10 * mCp; let ptsSms = 10 * mSms; let ptsVenda = 10 * mVenda; let ptsNps = dadosS.ptsNps || 0;
@@ -2635,13 +2636,16 @@ document.addEventListener('keydown', e => {
     function fecharDetalheSimulador() { filialAtiva = null; document.getElementById('tela-detalhe-simul').style.display = 'none'; document.getElementById('topo-geral').style.display = 'block'; document.getElementById('tela-selecao-simul').style.display = 'block'; document.querySelectorAll('.busca-ranking').forEach(input => { input.value = ''; }); filtrarSelecao('simul'); }
 
     async function carregarDados(tentativas = 3) {
-        const memoriaLocal = localStorage.getItem('dadosSenior_Memoria_v98');
+        // apaga o cache antigo, que guardava senhas e dados de colaboradores
+        try { localStorage.removeItem('dadosSenior_Memoria_v98'); } catch (e) {}
+        let memoriaLocal = null;
+        try { memoriaLocal = localStorage.getItem('dadosSenior_Publico_v99'); } catch (e) {}
         if (memoriaLocal) {
             try {
                 renderizarTela(JSON.parse(memoriaLocal));
                 document.getElementById('texto-carregando').innerText = 'Sincronizando...';
             } catch (e) {
-                localStorage.removeItem('dadosSenior_Memoria_v98');
+                localStorage.removeItem('dadosSenior_Publico_v99');
             }
         }
 
@@ -2672,7 +2676,7 @@ document.addEventListener('keydown', e => {
                 throw new Error("Aba Sênior não encontrada ou vazia!");
             }
 
-            localStorage.setItem('dadosSenior_Memoria_v98', JSON.stringify(json));
+            try { localStorage.setItem('dadosSenior_Publico_v99', JSON.stringify(json)); } catch (e) {}
             renderizarTela(json);
             document.getElementById('texto-carregando').innerText = '';
             document.getElementById('aviso-erro').style.display = 'none';
@@ -2692,7 +2696,7 @@ document.addEventListener('keydown', e => {
                 } else {
                     const elementoAviso = document.getElementById('aviso-erro');
                     elementoAviso.style.display = 'block';
-                    elementoAviso.innerHTML = '⚠️ Erro de Conexão: ' + erro.message;
+                    elementoAviso.innerText = '⚠️ Erro de Conexão: ' + erro.message;
                     document.getElementById('texto-carregando').innerText = '';
                     document.getElementById('lista-selecao-ranking').innerHTML = '';
                 }
