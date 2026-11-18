@@ -2037,7 +2037,7 @@ document.addEventListener('keydown', e => {
         }
         // 2) texto tipo "Atualizado até 11/11" / "Data: 11/11/2026" nos cabeçalhos (2 primeiras linhas) das abas
         const hoje = new Date(); let melhor = null;
-        for (const k of ['ct_colaborador', 'cartao', 'nsl_senior', 'super', 'sms', 'cp', 'pf']) {
+        for (const k of ['datas_cabecalho', 'ct_colaborador', 'cartao', 'nsl_senior', 'super', 'sms', 'cp', 'pf']) {
             const aba = json && json[k]; if (!Array.isArray(aba)) continue;
             for (const linha of aba.slice(0, 2)) {
                 if (!Array.isArray(linha)) continue;
